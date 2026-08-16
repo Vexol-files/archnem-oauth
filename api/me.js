@@ -4,13 +4,22 @@ export default async function handler(req, res) {
 
   if (!token) return res.status(401).json({ error: "No token" });
 
-  // tu normalnie: weryfikacja tokena, pobranie usera z Discorda / bazy
-  // na start: placeholder
+  // pobieramy prawdziwego usera z Discorda
+  const userRes = await fetch("https://discord.com/api/users/@me", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!userRes.ok) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+
+  const user = await userRes.json();
 
   return res.json({
-    id: "1234567890",
-    username: "ArchnUser",
-    discriminator: "0001",
+    id: user.id,
+    username: user.username,
+    discriminator: user.discriminator,
+    avatar: user.avatar,
     premium: false
   });
 }
