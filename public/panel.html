@@ -32,9 +32,11 @@ body {
     font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* TOP BAR */
 .topbar {
     display:flex;
     justify-content:space-between;
+    align-items:center;
     padding:20px;
 }
 
@@ -50,10 +52,34 @@ body {
     border-radius:50%;
 }
 
+.top-buttons {
+    display:flex;
+    gap:10px;
+}
+
+.btn {
+    padding:8px 14px;
+    border-radius:999px;
+    border:none;
+    background:#7b3fff;
+    color:#fff;
+    cursor:pointer;
+    font-size:13px;
+    box-shadow:0 0 20px rgba(123,63,255,0.6);
+}
+
+.mode-btn {
+    background:#333;
+}
+
+/* ROLE */
 .roles {
     display:flex;
     gap:8px;
     align-items:center;
+    padding-right:20px;
+    margin-top:10px;
+    justify-content:flex-end;
 }
 
 .role {
@@ -84,9 +110,31 @@ body {
 .owner { background:#ff3b3b; }
 .ownerdark { background:#b30000; }
 
-.panel {
-    max-width:520px;
-    margin:40px auto;
+/* LAYOUT */
+.container {
+    display:flex;
+    padding:20px;
+    gap:20px;
+}
+
+.sidebar {
+    width:220px;
+    background:var(--card);
+    padding:20px;
+    border-radius:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+
+.sidebar h3 {
+    margin-top:0;
+    margin-bottom:12px;
+    font-size:16px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+}
+
+.main-panel {
+    flex:1;
     background:var(--card);
     padding:28px;
     border-radius:24px;
@@ -94,43 +142,43 @@ body {
     border:1px solid rgba(255,255,255,0.06);
 }
 
-.logout-btn {
-    margin-top:20px;
-    padding:10px 16px;
-    border-radius:999px;
-    border:none;
-    background:#7b3fff;
-    color:#fff;
-    font-size:14px;
-    font-weight:500;
-    cursor:pointer;
-    box-shadow:0 0 20px rgba(123,63,255,0.6);
-}
-
-.mode-btn {
-    padding:8px 14px;
-    border-radius:999px;
-    border:none;
-    background:#333;
-    color:#fff;
-    cursor:pointer;
-}
 </style>
 </head>
 
 <body>
 
+<!-- TOP BAR -->
 <div class="topbar">
     <div class="user-info" id="user-info"></div>
-    <div class="roles" id="roles"></div>
+
+    <div class="top-buttons">
+        <button class="btn" onclick="logout()">Logout</button>
+        <button class="btn mode-btn" onclick="toggleMode()">Tryb jasny/ciemny</button>
+    </div>
 </div>
 
-<div class="panel">
-    <h2>Archnemesis Panel</h2>
-    <p id="status">Ładuję dane...</p>
+<!-- ROLE -->
+<div class="roles" id="roles"></div>
 
-    <button class="logout-btn" onclick="logout()">Wyloguj i wróć na archnem.xo.je</button>
-    <button class="mode-btn" onclick="toggleMode()">Tryb jasny/ciemny</button>
+<!-- MAIN LAYOUT -->
+<div class="container">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+        <h3>Informations</h3>
+        <div id="info-box">
+            <p>• Twój panel Archnemesis</p>
+            <p>• Dane pobrane z Discord OAuth2</p>
+            <p>• Role wyświetlane automatycznie</p>
+        </div>
+    </div>
+
+    <!-- MAIN PANEL -->
+    <div class="main-panel">
+        <h2>Archnemesis Panel</h2>
+        <p id="status">Ładuję dane...</p>
+    </div>
+
 </div>
 
 <script>
@@ -183,16 +231,9 @@ async function loadUser() {
             "1534494523768569897": {name:"Owner Dark", class:"ownerdark"}
         };
 
-        // tu pobieramy role z Discorda
-        const guildRes = await fetch(`https://discord.com/api/users/@me/guilds`, {
-            headers: { Authorization: `Bearer ${data.token}` }
-        });
-
-        // UWAGA: jeśli nie masz scope "guilds" → role musimy pobierać z BOT API
-        // więc tu zrobimy placeholder:
+        // UWAGA: role musisz pobierać z BOT API (Discord OAuth2 nie daje rolek)
         const userRoles = data.roles || [];
 
-        // wyświetlanie rolek
         for (const roleId of userRoles) {
             if (roles[roleId]) {
                 const r = roles[roleId];
