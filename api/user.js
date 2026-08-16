@@ -1,14 +1,12 @@
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
   try {
-    const { access_token, user } = req.query;
+    const access_token = req.query.access_token;
 
     if (!access_token) {
       return res.status(400).json({ error: "Missing access_token" });
     }
 
-    // 1. Pobierz dane użytkownika z Discord OAuth2
+    // 1. Pobierz dane użytkownika z OAuth2
     const userResponse = await fetch("https://discord.com/api/users/@me", {
       headers: {
         Authorization: `Bearer ${access_token}`
@@ -21,7 +19,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid access_token" });
     }
 
-    // 2. Pobierz członka serwera (role)
+    // 2. Pobierz role użytkownika
     const guildMemberResponse = await fetch(
       `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`,
       {
@@ -31,28 +29,27 @@ export default async function handler(req, res) {
       }
     );
 
-    let guildMember = null;
+    const guildMember =
+      guildMemberResponse.status === 200
+        ? await guildMemberResponse.json()
+        : { roles: [] };
 
-    if (guildMemberResponse.status === 200) {
-      guildMember = await guildMemberResponse.json();
-    }
-
-    // 3. Zbuduj JSON dla panelu
-    const json = {
+    // 3. Zwróć JSON dla panelu
+    return res.status(200).json({
       id: userData.id,
       username: userData.username,
       discriminator: userData.discriminator,
       avatar: userData.avatar,
       email: userData.email ?? null,
-      age: 18, // przykładowa wartość
-      premium: false, // przykładowa wartość
-      roles: guildMember?.roles ?? []
-    };
-
-    return res.status(200).json(json);
+      age: 18,
+      premium: false,
+      roles: guildMember.roles
+    });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({
+      error: "Internal server error",
+      details: err.message
+    });
   }
 }
