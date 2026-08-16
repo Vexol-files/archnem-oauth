@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Archnemesis Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+    --bg: #05060a;
+    --card: #0b0f1a;
+    --accent: #7b3fff;
+    --accent-soft: rgba(123,63,255,0.35);
+    --text-main: #f5f5ff;
+    --text-muted: #9aa0c2;
+}
+body {
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at top, #151a2f 0, #05060a 55%);
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color:var(--text-main);
+}
+.panel {
+    width:100%;
+    max-width:520px;
+    background:var(--card);
+    border-radius:24px;
+    padding:28px 26px;
+    box-shadow:0 0 40px rgba(0,0,0,0.7), 0 0 60px var(--accent-soft);
+    border:1px solid rgba(255,255,255,0.06);
+}
+.panel-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+}
+.panel-title {
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+}
+.badge {
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    background:rgba(123,63,255,0.18);
+    border:1px solid var(--accent-soft);
+    color:var(--accent);
+}
+.status {
+    font-size:13px;
+    color:var(--text-muted);
+    margin-bottom:16px;
+}
+.user-card {
+    margin-top:10px;
+    padding:14px 12px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.06);
+}
+.user-row {
+    display:flex;
+    justify-content:space-between;
+    font-size:14px;
+    margin-bottom:6px;
+}
+.user-label {
+    color:var(--text-muted);
+}
+.user-value {
+    color:var(--text-main);
+    font-weight:500;
+}
+.logout-btn {
+    margin-top:20px;
+    padding:10px 16px;
+    border-radius:999px;
+    border:none;
+    background:#7b3fff;
+    color:#fff;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    box-shadow:0 0 20px rgba(123,63,255,0.6);
+}
+.error {
+    color:#ff6b81;
+}
+</style>
+</head>
+<body>
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-title">Archnemesis Panel</div>
+        <div class="badge">Discord OAuth2</div>
+    </div>
+    <div id="status" class="status">Ładuję dane...</div>
+    <div id="user" class="user-card" style="display:none;"></div>
+
+    <button class="logout-btn" onclick="logout()">Wyloguj i wróć na archnem.xo.je</button>
+</div>
+
+<script>
+async function loadUser() {
+    const statusEl = document.getElementById('status');
+    const userEl = document.getElementById('user');
+
+    try {
+        const res = await fetch('/api/user');
+
+        if (!res.ok) {
+            statusEl.innerHTML = '<span class="error">Błąd ładowania danych ('+res.status+')</span>';
+            return;
+        }
+
+        const data = await res.json();
+
+        userEl.style.display = 'block';
+        userEl.innerHTML = `
+            <div class="user-row">
+                <div class="user-label">Nick</div>
+                <div class="user-value">${data.username}#${data.discriminator}</div>
+            </div>
+            <div class="user-row">
+                <div class="user-label">ID</div>
+                <div class="user-value">${data.id}</div>
+            </div>
+            <div class="user-row">
+                <div class="user-label">Premium</div>
+                <div class="user-value">${data.premium ? 'TAK' : 'NIE'}</div>
+            </div>
+        `;
+        statusEl.textContent = "Zalogowano.";
+    } catch (e) {
+        statusEl.innerHTML = '<span class="error">Błąd ładowania danych (exception)</span>';
+        console.log(e);
+    }
+}
+
+function logout() {
+    document.cookie = "archnem_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.location.href = "https://archnem.xo.je/";
+}
+
+loadUser();
+</script>
+</body>
+</html>
