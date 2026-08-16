@@ -1,3 +1,4 @@
+// /api/callback.js
 export default async function handler(req, res) {
   try {
     const code = req.query.code;
@@ -18,6 +19,7 @@ export default async function handler(req, res) {
     });
 
     const tokenData = await tokenResponse.json();
+
     if (!tokenData || !tokenData.access_token) {
       return res.redirect("/panel.html?error=token_failed");
     }
