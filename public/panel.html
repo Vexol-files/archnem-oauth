@@ -5,96 +5,49 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Archnemesis — Panel</title>
   <style>
-    :root{
-      --bg-1: #0a0a0a;
-      --bg-2: #1a001f;
-      --card-bg: rgba(255,255,255,0.08);
-      --text: #eaeaea;
-      --accent: #d28cff;
-      --muted: #bfc7d6;
-    }
-    [data-theme="light"]{
-      --bg-1: #f6f7fb;
-      --bg-2: #eef2ff;
-      --card-bg: rgba(10,10,12,0.04);
-      --text: #0b1220;
-      --accent: #6b21a8;
-      --muted: #4b5563;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
-      color: var(--text);
-      padding: 28px;
-      transition: background .3s, color .3s;
-    }
-
-    .container { max-width: 980px; margin: auto; }
-
-    .header {
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      margin-bottom:18px;
-    }
-
-    .title {
-      font-size:28px; color:var(--accent); font-weight:700;
-    }
-
-    .controls { display:flex; gap:10px; align-items:center; }
-
-    .btn {
-      background:var(--card-bg); border:1px solid rgba(255,255,255,0.12);
-      padding:8px 12px; border-radius:10px; color:var(--text); cursor:pointer;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius:14px; padding:20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px);
-    }
-
-    .user-row { display:flex; gap:18px; align-items:center; margin-bottom:12px; }
-    .avatar { width:96px; height:96px; border-radius:50%; border:3px solid var(--accent); object-fit:cover; }
-    .username { font-size:20px; font-weight:700; color:var(--text); }
-    .sub { color:var(--muted); font-size:14px; }
-
-    .roles { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
-    .role { padding:8px 12px; border-radius:999px; font-weight:600; background:rgba(255,255,255,0.12); color:#071022; }
-
-    .error { color:#ff6b6b; margin-top:8px; }
-
-    .lang-toggle, .theme-toggle { display:flex; gap:6px; align-items:center; }
-    .small { font-size:13px; color:var(--muted); }
-
-    footer { margin-top:18px; color:var(--muted); font-size:13px; text-align:center; }
+    :root{ --bg:#0b1220; --card:rgba(255,255,255,0.06); --text:#eaeaea; --accent:#d28cff; --muted:#9aa6b2; }
+    [data-theme="light"]{ --bg:#f6f7fb; --card:rgba(10,10,12,0.04); --text:#0b1220; --accent:#6b21a8; --muted:#4b5563; }
+    body{ margin:0; font-family:Inter,Segoe UI,Arial; background:linear-gradient(135deg,var(--bg),#0a0a0a); color:var(--text); padding:28px; transition:all .2s; }
+    .container{ max-width:980px; margin:auto; }
+    .header{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .title{ font-size:26px; color:var(--accent); font-weight:700; }
+    .controls{ display:flex; gap:8px; align-items:center; }
+    .btn{ background:var(--card); border-radius:10px; padding:8px 12px; color:var(--text); border:1px solid rgba(255,255,255,0.06); cursor:pointer; }
+    .card{ background:var(--card); border-radius:14px; padding:20px; backdrop-filter:blur(8px); }
+    .user-row{ display:flex; gap:16px; align-items:center; margin-bottom:12px; }
+    .avatar{ width:88px; height:88px; border-radius:50%; border:3px solid var(--accent); object-fit:cover; }
+    .username{ font-size:18px; font-weight:700; }
+    .sub{ color:var(--muted); font-size:13px; }
+    .roles{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .role{ padding:8px 12px; border-radius:999px; font-weight:600; background:rgba(255,255,255,0.12); color:#071022; }
+    .error{ color:#ff6b6b; margin-top:10px; }
+    footer{ margin-top:18px; color:var(--muted); font-size:13px; text-align:center; }
   </style>
 </head>
 <body>
-  <div class="container" id="app">
+  <div class="container">
     <div class="header">
       <div>
         <div class="title" id="brand">Archnemesis</div>
-        <div class="small" id="tagline">Panel użytkownika</div>
+        <div class="sub" id="tagline">Panel użytkownika</div>
       </div>
 
       <div class="controls">
-        <div class="lang-toggle">
+        <div>
           <button class="btn" id="lang-pl">PL</button>
           <button class="btn" id="lang-en">EN</button>
         </div>
-
-        <div class="theme-toggle">
+        <div>
           <button class="btn" id="theme-toggle">Dark</button>
         </div>
-
-        <button class="btn" id="logout">Wyloguj</button>
+        <div>
+          <button class="btn" id="logout">Wyloguj</button>
+        </div>
       </div>
     </div>
 
     <div class="card">
-      <div id="status">Ładowanie danych...</div>
+      <div id="status">Ładowanie...</div>
 
       <div id="userArea" style="display:none;">
         <div class="user-row">
@@ -109,13 +62,14 @@
         <div class="roles" id="roles"></div>
       </div>
 
-      <div id="errorBox" style="display:none;" class="error"></div>
+      <div id="errorBox" class="error" style="display:none;"></div>
     </div>
 
     <footer id="footer">© Archnemesis</footer>
   </div>
 
   <script>
+    // Role map
     const ROLE_DEFS = {
       "1532749280220024842": { name: "Premium", color: "#FFD700", hidden: false },
       "1536693194744660039": { name: "Beta", color: "#C060FF", hidden: false },
@@ -131,6 +85,7 @@
       "1534494523768569897": { name: "Owner Bot", color: "#8B0000", hidden: true }
     };
 
+    // Elements
     const statusEl = document.getElementById("status");
     const userArea = document.getElementById("userArea");
     const avatarEl = document.getElementById("avatar");
@@ -150,7 +105,7 @@
     const TEXT = {
       pl: {
         loading: "Ładowanie danych...",
-        noToken: "Brak sesji. Zaloguj się przez Discord.",
+        noSession: "Brak sesji. Zaloguj się przez Discord.",
         loggedAs: "Zalogowany jako",
         noRoles: "Brak ról lub bot nie widzi członków serwera.",
         logout: "Wyloguj",
@@ -161,7 +116,7 @@
       },
       en: {
         loading: "Loading data...",
-        noToken: "No session. Log in with Discord.",
+        noSession: "No session. Log in with Discord.",
         loggedAs: "Logged in as",
         noRoles: "No roles or bot cannot see server members.",
         logout: "Logout",
@@ -172,6 +127,7 @@
       }
     };
 
+    // State
     let LANG = localStorage.getItem("archnem_lang") || "pl";
     let THEME = localStorage.getItem("archnem_theme") || "dark";
 
@@ -201,57 +157,80 @@
     });
 
     logoutBtn.addEventListener("click", () => {
-      window.location.href = "/api/logout";
+      // clear sessionStorage and redirect to main site
+      sessionStorage.removeItem("archnem_token");
+      window.location.href = "/api/logout"; // backend will redirect to archnem.xo.je if configured
     });
 
     applyLang();
     applyTheme();
 
-    fetch("/api/user")
-      .then(r => r.json())
-      .then(data => {
-        if (data.error) {
-          statusEl.textContent = TEXT[LANG].noToken;
+    // --- Token handling without cookie ---
+    // 1) If access_token present in URL, copy to sessionStorage and remove from URL
+    const url = new URL(window.location.href);
+    const urlToken = url.searchParams.get("access_token");
+    if (urlToken) {
+      sessionStorage.setItem("archnem_token", urlToken);
+      // remove token from URL to avoid leaking in history
+      url.searchParams.delete("access_token");
+      window.history.replaceState({}, document.title, url.pathname + url.search);
+    }
+
+    // 2) Use token from sessionStorage
+    const token = sessionStorage.getItem("archnem_token");
+    if (!token) {
+      statusEl.textContent = TEXT[LANG].noSession;
+      errorBox.style.display = "block";
+      errorBox.textContent = TEXT[LANG].noSession;
+    } else {
+      // call backend /api/user and pass token as query param (server expects it)
+      // we pass token in query so backend can use it; avoid exposing BOT_TOKEN in frontend
+      fetch(`/api/user?access_token=${encodeURIComponent(token)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.error) {
+            statusEl.textContent = TEXT[LANG].noSession;
+            errorBox.style.display = "block";
+            errorBox.textContent = data.error || "Error";
+            return;
+          }
+
+          userArea.style.display = "block";
+          statusEl.textContent = `${TEXT[LANG].loggedAs} ${data.username}#${data.discriminator}`;
+
+          if (data.avatar) {
+            avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
+          } else {
+            avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
+          }
+
+          usernameEl.textContent = `${data.username}#${data.discriminator}`;
+          userSubEl.textContent = "";
+
+          const roleIds = Array.isArray(data.roles) ? data.roles : [];
+          if (!roleIds.length) {
+            rolesEl.innerHTML = `<div class="error">${TEXT[LANG].noRoles}</div>`;
+            return;
+          }
+
+          rolesEl.innerHTML = "";
+          roleIds.forEach(roleId => {
+            const def = ROLE_DEFS[roleId];
+            if (!def || def.hidden) return;
+            const el = document.createElement("div");
+            el.className = "role";
+            el.textContent = def.name;
+            el.style.background = def.color;
+            rolesEl.appendChild(el);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          statusEl.textContent = TEXT[LANG].noSession;
           errorBox.style.display = "block";
-          errorBox.textContent = data.error;
-          return;
-        }
-
-        userArea.style.display = "block";
-        statusEl.textContent = `${TEXT[LANG].loggedAs} ${data.username}#${data.discriminator}`;
-
-        if (data.avatar) {
-          avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
-        } else {
-          avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
-        }
-
-        usernameEl.textContent = `${data.username}#${data.discriminator}`;
-        userSubEl.textContent = "";
-
-        const roleIds = Array.isArray(data.roles) ? data.roles : [];
-        if (!roleIds.length) {
-          rolesEl.innerHTML = `<div class="error">${TEXT[LANG].noRoles}</div>`;
-          return;
-        }
-
-        rolesEl.innerHTML = "";
-        roleIds.forEach(roleId => {
-          const def = ROLE_DEFS[roleId];
-          if (!def || def.hidden) return;
-          const el = document.createElement("div");
-          el.className = "role";
-          el.textContent = def.name;
-          el.style.background = def.color;
-          rolesEl.appendChild(el);
+          errorBox.textContent = "Network error";
         });
-      })
-      .catch(err => {
-        console.error(err);
-        statusEl.textContent = TEXT[LANG].noToken;
-        errorBox.style.display = "block";
-        errorBox.textContent = "Network error";
-      });
+    }
   </script>
 </body>
 </html>
