@@ -9,6 +9,6 @@ export const ROLE_DEFS = {
   "1536692884928208936": { name: "HeadAdmin", color: "#FF0000", hidden: true },
   "1532711838264066129": { name: "Co-Owner", color: "#FF0000", hidden: true },
 
-  "1529827656428818492": { name: "Owner", color: "#FF0000", hidden: true },       // Owner człowiek
-  "1534494523768569897": { name: "Owner Bot", color: "#8B0000", hidden: true }    // Owner bot
+  "1529827656428818492": { name: "Owner", color: "#FF0000", hidden: true },
+  "1534494523768569897": { name: "Owner Bot", color: "#8B0000", hidden: true }
 };
