@@ -1,8 +1,8 @@
-// /api/callback.js
+// TEMP DEBUG - wklej na chwilę do /api/callback.js
 export default async function handler(req, res) {
   try {
     const code = req.query.code;
-    if (!code) return res.redirect("/panel.html?error=missing_code");
+    if (!code) return res.status(400).json({ error: "missing_code" });
 
     const params = new URLSearchParams({
       client_id: process.env.CLIENT_ID,
@@ -20,15 +20,19 @@ export default async function handler(req, res) {
 
     const tokenData = await tokenResponse.json();
 
-    if (!tokenData || !tokenData.access_token) {
-      return res.redirect("/panel.html?error=token_failed");
-    }
-
-    // Redirect z tokenem w URL (użytkownik prosił o flow bez cookie)
-    // Token trafia do panel.html jako query param access_token
-    return res.redirect(`/panel.html?access_token=${encodeURIComponent(tokenData.access_token)}`);
+    // Zwróć debug JSON zamiast redirectu
+    return res.status(200).json({
+      ok: true,
+      tokenResponseStatus: tokenResponse.status,
+      tokenDataKeys: Object.keys(tokenData),
+      tokenDataSample: {
+        access_token_present: !!tokenData.access_token,
+        access_token_length: tokenData.access_token ? tokenData.access_token.length : 0
+      },
+      raw: tokenData
+    });
   } catch (err) {
-    console.error("callback.js error:", err);
-    return res.redirect("/panel.html?error=server_error");
+    console.error("callback debug error:", err);
+    return res.status(500).json({ error: "server_error", message: err.message });
   }
 }
