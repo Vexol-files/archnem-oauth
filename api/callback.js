@@ -21,9 +21,9 @@ export default async function handler(req, res) {
 
   const sessionToken = tokenData.access_token;
 
-  // zapis tokenu w cookie (domena vercel)
+  // zapis tokenu w cookie (Vercel → domena vercel.app)
   res.setHeader("Set-Cookie", `archnem_token=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax`);
 
-  // przekierowanie na panel na Vercel
-  return res.redirect("/panel");
+  // przekierowanie na panel
+  return res.redirect("/panel.html");
 }
