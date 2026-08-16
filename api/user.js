@@ -6,11 +6,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing access_token" });
     }
 
-    // 1. Pobierz dane użytkownika z OAuth2
     const userResponse = await fetch("https://discord.com/api/users/@me", {
-      headers: {
-        Authorization: `Bearer ${access_token}`
-      }
+      headers: { Authorization: `Bearer ${access_token}` }
     });
 
     const userData = await userResponse.json();
@@ -19,13 +16,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid access_token" });
     }
 
-    // 2. Pobierz role użytkownika
     const guildMemberResponse = await fetch(
       `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`,
       {
-        headers: {
-          Authorization: `Bot ${process.env.BOT_TOKEN}`
-        }
+        headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` }
       }
     );
 
@@ -34,7 +28,6 @@ export default async function handler(req, res) {
         ? await guildMemberResponse.json()
         : { roles: [] };
 
-    // 3. Zwróć JSON dla panelu
     return res.status(200).json({
       id: userData.id,
       username: userData.username,
@@ -47,9 +40,6 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    return res.status(500).json({
-      error: "Internal server error",
-      details: err.message
-    });
+    return res.status(500).json({ error: "Internal server error", details: err.message });
   }
 }
