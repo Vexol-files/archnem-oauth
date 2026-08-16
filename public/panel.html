@@ -8,36 +8,47 @@
 <style>
 :root {
     --bg: #05060a;
+    --bg-alt: #070814;
     --card: #0b0f1a;
     --accent: #7b3fff;
     --accent-soft: rgba(123,63,255,0.35);
+    --accent-soft2: rgba(123,63,255,0.18);
     --text-main: #f5f5ff;
     --text-muted: #9aa0c2;
+    --border-soft: rgba(255,255,255,0.06);
 }
 
 .light {
     --bg: #f5f5ff;
+    --bg-alt: #e9ebff;
     --card: #ffffff;
     --accent: #7b3fff;
     --accent-soft: rgba(123,63,255,0.25);
+    --accent-soft2: rgba(123,63,255,0.12);
     --text-main: #0b0f1a;
     --text-muted: #444;
+    --border-soft: rgba(0,0,0,0.08);
+}
+
+* {
+    box-sizing:border-box;
 }
 
 body {
     margin:0;
     min-height:100vh;
-    background:var(--bg);
+    background:radial-gradient(circle at top, #151a2f 0, var(--bg) 55%);
     color:var(--text-main);
     font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* TOP BAR */
+
 .topbar {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:20px;
+    padding:18px 24px;
 }
 
 .user-info {
@@ -50,46 +61,65 @@ body {
     width:42px;
     height:42px;
     border-radius:50%;
+    box-shadow:0 0 12px rgba(0,0,0,0.6);
 }
+
+.user-info-name {
+    font-size:14px;
+    font-weight:500;
+}
+
+/* Buttons top-right */
 
 .top-buttons {
     display:flex;
     gap:10px;
+    align-items:center;
 }
 
 .btn {
     padding:8px 14px;
     border-radius:999px;
     border:none;
-    background:#7b3fff;
+    background:var(--accent);
     color:#fff;
     cursor:pointer;
     font-size:13px;
-    box-shadow:0 0 20px rgba(123,63,255,0.6);
+    font-weight:500;
+    box-shadow:0 0 20px var(--accent-soft);
+    transition:transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.btn:hover {
+    transform:translateY(-1px);
+    box-shadow:0 0 26px var(--accent-soft);
 }
 
 .mode-btn {
     background:#333;
+    box-shadow:0 0 16px rgba(0,0,0,0.6);
 }
 
-/* ROLE */
+/* Roles row */
+
 .roles {
     display:flex;
     gap:8px;
     align-items:center;
-    padding-right:20px;
-    margin-top:10px;
+    padding:0 24px 10px 24px;
     justify-content:flex-end;
 }
 
 .role {
     padding:6px 10px;
     border-radius:999px;
-    font-size:12px;
+    font-size:11px;
     font-weight:600;
     display:flex;
     align-items:center;
     gap:6px;
+    background:rgba(255,255,255,0.02);
+    border:1px solid var(--border-soft);
 }
 
 .circle {
@@ -99,6 +129,7 @@ body {
 }
 
 /* Kolory rolek */
+
 .premium { background:#ffd500; }
 .beta { background:#ffe766; }
 .booster { background:#d26bff; }
@@ -110,38 +141,204 @@ body {
 .owner { background:#ff3b3b; }
 .ownerdark { background:#b30000; }
 
-/* LAYOUT */
-.container {
+/* MAIN LAYOUT */
+
+.main-wrapper {
     display:flex;
-    padding:20px;
-    gap:20px;
+    padding:0 24px 24px 24px;
+    gap:18px;
 }
+
+/* Sidebar (left) */
 
 .sidebar {
-    width:220px;
+    width:240px;
     background:var(--card);
-    padding:20px;
     border-radius:20px;
-    box-shadow:0 0 20px rgba(0,0,0,0.4);
+    padding:18px 16px;
+    box-shadow:0 0 24px rgba(0,0,0,0.6);
+    border:1px solid var(--border-soft);
 }
 
-.sidebar h3 {
-    margin-top:0;
-    margin-bottom:12px;
-    font-size:16px;
+.sidebar-title {
+    font-size:13px;
     text-transform:uppercase;
-    letter-spacing:0.05em;
+    letter-spacing:0.12em;
+    margin-bottom:12px;
+    color:var(--text-muted);
 }
 
-.main-panel {
+.sidebar-menu {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.sidebar-item {
+    padding:8px 10px;
+    border-radius:12px;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--text-muted);
+    transition:background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+}
+
+.sidebar-item:hover {
+    background:rgba(255,255,255,0.04);
+    transform:translateX(2px);
+}
+
+.sidebar-item.active {
+    background:var(--accent-soft2);
+    color:var(--text-main);
+}
+
+.sidebar-dot {
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--accent);
+}
+
+/* Content area (right) */
+
+.content {
     flex:1;
-    background:var(--card);
-    padding:28px;
-    border-radius:24px;
-    box-shadow:0 0 40px rgba(0,0,0,0.7), 0 0 60px var(--accent-soft);
-    border:1px solid rgba(255,255,255,0.06);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
 }
 
+/* Top info card */
+
+.info-card {
+    background:var(--card);
+    border-radius:20px;
+    padding:18px 18px;
+    border:1px solid var(--border-soft);
+    box-shadow:0 0 24px rgba(0,0,0,0.5);
+}
+
+.info-title {
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:8px;
+}
+
+.info-sub {
+    font-size:13px;
+    color:var(--text-muted);
+}
+
+/* Main panel card */
+
+.panel-card {
+    background:var(--card);
+    border-radius:24px;
+    padding:24px 22px;
+    border:1px solid var(--border-soft);
+    box-shadow:0 0 40px rgba(0,0,0,0.7), 0 0 60px var(--accent-soft);
+}
+
+.panel-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+}
+
+.panel-title {
+    font-size:18px;
+    font-weight:600;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+}
+
+.panel-badge {
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    background:var(--accent-soft2);
+    border:1px solid var(--accent-soft);
+    color:var(--accent);
+}
+
+.panel-status {
+    font-size:13px;
+    color:var(--text-muted);
+    margin-bottom:16px;
+}
+
+/* Tab content */
+
+.tab-content {
+    margin-top:10px;
+    font-size:14px;
+}
+
+/* Informations tab */
+
+.info-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 18px;
+    margin-top:8px;
+}
+
+.info-label {
+    font-size:12px;
+    color:var(--text-muted);
+}
+
+.info-value {
+    font-size:13px;
+    font-weight:500;
+}
+
+/* Account tab */
+
+.account-section {
+    margin-top:8px;
+}
+
+.account-row {
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:6px;
+    font-size:13px;
+}
+
+/* Roles tab */
+
+.roles-list {
+    margin-top:8px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+/* Settings tab */
+
+.settings-section {
+    margin-top:8px;
+    font-size:13px;
+}
+
+/* Responsive */
+
+@media (max-width: 800px) {
+    .main-wrapper {
+        flex-direction:column;
+    }
+    .sidebar {
+        width:100%;
+    }
+}
 </style>
 </head>
 
@@ -149,7 +346,9 @@ body {
 
 <!-- TOP BAR -->
 <div class="topbar">
-    <div class="user-info" id="user-info"></div>
+    <div class="user-info" id="user-info">
+        <!-- avatar + nick -->
+    </div>
 
     <div class="top-buttons">
         <button class="btn" onclick="logout()">Logout</button>
@@ -157,26 +356,62 @@ body {
     </div>
 </div>
 
-<!-- ROLE -->
-<div class="roles" id="roles"></div>
+<!-- ROLES ROW -->
+<div class="roles" id="roles">
+    <!-- role badges -->
+</div>
 
 <!-- MAIN LAYOUT -->
-<div class="container">
+<div class="main-wrapper">
 
-    <!-- LEFT SIDEBAR -->
+    <!-- SIDEBAR -->
     <div class="sidebar">
-        <h3>Informations</h3>
-        <div id="info-box">
-            <p>• Twój panel Archnemesis</p>
-            <p>• Dane pobrane z Discord OAuth2</p>
-            <p>• Role wyświetlane automatycznie</p>
+        <div class="sidebar-title">Menu</div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item active" data-tab="informations">
+                <div class="sidebar-dot"></div>
+                <span>Informations</span>
+            </div>
+            <div class="sidebar-item" data-tab="account">
+                <div class="sidebar-dot"></div>
+                <span>Account</span>
+            </div>
+            <div class="sidebar-item" data-tab="roles">
+                <div class="sidebar-dot"></div>
+                <span>Roles</span>
+            </div>
+            <div class="sidebar-item" data-tab="settings">
+                <div class="sidebar-dot"></div>
+                <span>Settings</span>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN PANEL -->
-    <div class="main-panel">
-        <h2>Archnemesis Panel</h2>
-        <p id="status">Ładuję dane...</p>
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- INFO CARD -->
+        <div class="info-card">
+            <div class="info-title">Archnemesis Panel</div>
+            <div class="info-sub" id="info-sub">
+                Dane pobrane z Discord OAuth2. Kliknij „Informations”, aby zobaczyć szczegóły konta.
+            </div>
+        </div>
+
+        <!-- MAIN PANEL CARD -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <div class="panel-title">ARCHNEMESIS PANEL</div>
+                <div class="panel-badge">DISCORD OAUTH2</div>
+            </div>
+            <div class="panel-status" id="status">Ładuję dane...</div>
+
+            <!-- TAB CONTENT -->
+            <div class="tab-content" id="tab-content">
+                <!-- domyślnie: informations -->
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -191,6 +426,23 @@ function logout() {
     window.location.href = "https://archnem.xo.je/";
 }
 
+// definicja ról (ID -> nazwa + klasa)
+const ROLE_DEFS = {
+    "1532749280220024842": {name:"Premium", class:"premium"},
+    "1536693194744660039": {name:"Beta", class:"beta"},
+    "1534495312377417868": {name:"Booster", class:"booster"},
+    "1534495410566201427": {name:"Trusted", class:"trusted"},
+    "1532716147093274685": {name:"Moderator", class:"moderator"},
+    "1536692816284094554": {name:"Admin", class:"admin"},
+    "1536692884928208936": {name:"HeadAdmin", class:"headadmin"},
+    "1532711838264066129": {name:"Co-Owner", class:"coowner"},
+    "1529827656428818492": {name:"Owner", class:"owner"},
+    "1534494523768569897": {name:"Owner Dark", class:"ownerdark"}
+};
+
+let USER_DATA = null;
+
+// ładowanie danych użytkownika z /api/user
 async function loadUser() {
     const statusEl = document.getElementById("status");
     const userInfo = document.getElementById("user-info");
@@ -204,6 +456,7 @@ async function loadUser() {
         }
 
         const data = await res.json();
+        USER_DATA = data;
 
         // avatar
         const avatarURL = data.avatar
@@ -212,31 +465,18 @@ async function loadUser() {
 
         userInfo.innerHTML = `
             <img src="${avatarURL}">
-            <div>${data.username}#${data.discriminator}</div>
+            <div class="user-info-name">${data.username}#${data.discriminator}</div>
         `;
 
         statusEl.innerHTML = "Zalogowano.";
 
-        // role IDs
-        const roles = {
-            "1532749280220024842": {name:"Premium", class:"premium"},
-            "1536693194744660039": {name:"Beta", class:"beta"},
-            "1534495312377417868": {name:"Booster", class:"booster"},
-            "1534495410566201427": {name:"Trusted", class:"trusted"},
-            "1532716147093274685": {name:"Moderator", class:"moderator"},
-            "1536692816284094554": {name:"Admin", class:"admin"},
-            "1536692884928208936": {name:"HeadAdmin", class:"headadmin"},
-            "1532711838264066129": {name:"Co-Owner", class:"coowner"},
-            "1529827656428818492": {name:"Owner", class:"owner"},
-            "1534494523768569897": {name:"Owner Dark", class:"ownerdark"}
-        };
+        // role z backendu (MUSI być data.roles = ["id1","id2",...])
+        const userRoles = Array.isArray(data.roles) ? data.roles : [];
 
-        // UWAGA: role musisz pobierać z BOT API (Discord OAuth2 nie daje rolek)
-        const userRoles = data.roles || [];
-
+        rolesEl.innerHTML = "";
         for (const roleId of userRoles) {
-            if (roles[roleId]) {
-                const r = roles[roleId];
+            if (ROLE_DEFS[roleId]) {
+                const r = ROLE_DEFS[roleId];
                 rolesEl.innerHTML += `
                     <div class="role">
                         <div class="circle ${r.class}"></div>
@@ -246,13 +486,143 @@ async function loadUser() {
             }
         }
 
+        // ustaw domyślną zakładkę
+        renderTab("informations");
+
     } catch (e) {
         statusEl.innerHTML = "Błąd ładowania danych (exception)";
         console.log(e);
     }
 }
 
-loadUser();
+// renderowanie zakładek
+
+function renderTab(tab) {
+    const tabContent = document.getElementById("tab-content");
+    const infoSub = document.getElementById("info-sub");
+
+    // podświetlenie menu
+    document.querySelectorAll(".sidebar-item").forEach(el => {
+        if (el.getAttribute("data-tab") === tab) {
+            el.classList.add("active");
+        } else {
+            el.classList.remove("active");
+        }
+    });
+
+    if (!USER_DATA) {
+        tabContent.innerHTML = "<p>Brak danych użytkownika. Spróbuj odświeżyć stronę.</p>";
+        return;
+    }
+
+    if (tab === "informations") {
+        infoSub.innerHTML = "Podstawowe informacje o Twoim koncie Discord i statusie w Archnemesis.";
+        tabContent.innerHTML = `
+            <div class="info-grid">
+                <div>
+                    <div class="info-label">Nick</div>
+                    <div class="info-value">${USER_DATA.username}#${USER_DATA.discriminator}</div>
+                </div>
+                <div>
+                    <div class="info-label">ID</div>
+                    <div class="info-value">${USER_DATA.id}</div>
+                </div>
+                <div>
+                    <div class="info-label">Email</div>
+                    <div class="info-value">${USER_DATA.email || "nie ustawiono"}</div>
+                </div>
+                <div>
+                    <div class="info-label">Wiek</div>
+                    <div class="info-value">${USER_DATA.age || "nie podano"}</div>
+                </div>
+                <div>
+                    <div class="info-label">Premium</div>
+                    <div class="info-value">${USER_DATA.premium ? "TAK" : "NIE"}</div>
+                </div>
+                <div>
+                    <div class="info-label">Role (liczba)</div>
+                    <div class="info-value">${Array.isArray(USER_DATA.roles) ? USER_DATA.roles.length : 0}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (tab === "account") {
+        infoSub.innerHTML = "Szczegóły konta i konfiguracja podstawowych danych.";
+        tabContent.innerHTML = `
+            <div class="account-section">
+                <div class="account-row">
+                    <span>Nick</span>
+                    <span>${USER_DATA.username}#${USER_DATA.discriminator}</span>
+                </div>
+                <div class="account-row">
+                    <span>ID</span>
+                    <span>${USER_DATA.id}</span>
+                </div>
+                <div class="account-row">
+                    <span>Email</span>
+                    <span>${USER_DATA.email || "nie ustawiono"}</span>
+                </div>
+                <div class="account-row">
+                    <span>Wiek</span>
+                    <span>${USER_DATA.age || "nie podano"}</span>
+                </div>
+                <div class="account-row">
+                    <span>Premium</span>
+                    <span>${USER_DATA.premium ? "TAK" : "NIE"}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    if (tab === "roles") {
+        infoSub.innerHTML = "Role przypisane do Twojego konta. Wyświetlane tylko te, które faktycznie masz.";
+        const userRoles = Array.isArray(USER_DATA.roles) ? USER_DATA.roles : [];
+        if (!userRoles.length) {
+            tabContent.innerHTML = "<p>Brak przypisanych ról lub backend nie zwraca listy ról.</p>";
+            return;
+        }
+
+        let html = `<div class="roles-list">`;
+        for (const roleId of userRoles) {
+            if (ROLE_DEFS[roleId]) {
+                const r = ROLE_DEFS[roleId];
+                html += `
+                    <div class="role">
+                        <div class="circle ${r.class}"></div>
+                        ${r.name} <span style="font-size:10px;color:var(--text-muted);">(${roleId})</span>
+                    </div>
+                `;
+            }
+        }
+        html += `</div>`;
+        tabContent.innerHTML = html;
+    }
+
+    if (tab === "settings") {
+        infoSub.innerHTML = "Ustawienia panelu Archnemesis (tryb jasny/ciemny, wylogowanie, itp.).";
+        tabContent.innerHTML = `
+            <div class="settings-section">
+                <p>• Tryb jasny/ciemny możesz przełączać przyciskiem w prawym górnym rogu.</p>
+                <p>• Wylogowanie czyści cookie sesji i przenosi Cię na stronę archnem.xo.je.</p>
+                <p>• Role są pobierane z backendu – jeśli masz role, a ich nie widzisz, upewnij się, że endpoint <code>/api/user</code> zwraca tablicę <code>roles</code> z ID ról.</p>
+            </div>
+        `;
+    }
+}
+
+// obsługa kliknięć w menu
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".sidebar-item").forEach(el => {
+        el.addEventListener("click", () => {
+            const tab = el.getAttribute("data-tab");
+            renderTab(tab);
+        });
+    });
+
+    loadUser();
+});
 </script>
 
 </body>
