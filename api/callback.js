@@ -19,18 +19,14 @@ export default async function handler(req, res) {
     });
 
     const tokenData = await tokenResponse.json();
+
     if (!tokenData || !tokenData.access_token) {
       return res.redirect("/panel.html?error=token_failed");
     }
 
-    // ustaw cookie HttpOnly; SameSite=None; Secure
-    const maxAge = 60 * 60; // 1h
-    res.setHeader(
-      "Set-Cookie",
-      `archnem_token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${maxAge}`
-    );
-
-    return res.redirect("/panel.html");
+    // Redirect z tokenem w URL (użytkownik prosił o flow bez cookie)
+    // Token trafia do panel.html jako query param access_token
+    return res.redirect(`/panel.html?access_token=${encodeURIComponent(tokenData.access_token)}`);
   } catch (err) {
     console.error("callback.js error:", err);
     return res.redirect("/panel.html?error=server_error");
