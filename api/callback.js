@@ -1,10 +1,7 @@
 export default async function handler(req, res) {
   try {
     const code = req.query.code;
-
-    if (!code) {
-      return res.redirect("/panel.html?error=missing_code");
-    }
+    if (!code) return res.redirect("/panel.html?error=missing_code");
 
     const params = new URLSearchParams({
       client_id: process.env.CLIENT_ID,
@@ -21,14 +18,18 @@ export default async function handler(req, res) {
     });
 
     const tokenData = await tokenResponse.json();
-
     if (!tokenData || !tokenData.access_token) {
       return res.redirect("/panel.html?error=token_failed");
     }
 
-    // Przekieruj do statycznego panelu z tokenem w URL
-    return res.redirect(`/panel.html?access_token=${tokenData.access_token}`);
+    // ustaw cookie HttpOnly, Secure, SameSite=Strict
+    const maxAge = 60 * 60; // 1h
+    res.setHeader(
+      "Set-Cookie",
+      `archnem_token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${maxAge}`
+    );
 
+    return res.redirect("/panel.html");
   } catch (err) {
     console.error("callback.js error:", err);
     return res.redirect("/panel.html?error=server_error");
