@@ -4,111 +4,115 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Archnemesis — Panel</title>
-
   <style>
+    :root{
+      --bg-1: #0a0a0a;
+      --bg-2: #1a001f;
+      --card-bg: rgba(255,255,255,0.08);
+      --text: #eaeaea;
+      --accent: #d28cff;
+      --muted: #bfc7d6;
+    }
+    [data-theme="light"]{
+      --bg-1: #f6f7fb;
+      --bg-2: #eef2ff;
+      --card-bg: rgba(10,10,12,0.04);
+      --text: #0b1220;
+      --accent: #6b21a8;
+      --muted: #4b5563;
+    }
+
     body {
       margin: 0;
       font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a001f, #0a0a0a);
-      background-size: 300% 300%;
-      animation: bgMove 12s ease infinite;
-      color: #eaeaea;
-      padding: 40px;
+      background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      color: var(--text);
+      padding: 28px;
+      transition: background .3s, color .3s;
     }
 
-    @keyframes bgMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    .container { max-width: 980px; margin: auto; }
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 30px;
-      border-radius: 20px;
-      backdrop-filter: blur(18px);
-      box-shadow: 0 0 35px rgba(127,0,255,0.3);
-      margin-bottom: 25px;
+    .header {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin-bottom:18px;
     }
 
     .title {
-      font-size: 45px;
-      margin: 0 0 20px 0;
-      color: #d28cff;
-      text-shadow: 0 0 20px #7f00ff;
-      text-align: center;
+      font-size:28px; color:var(--accent); font-weight:700;
     }
 
-    .user-box {
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    .controls { display:flex; gap:10px; align-items:center; }
+
+    .btn {
+      background:var(--card-bg); border:1px solid rgba(255,255,255,0.12);
+      padding:8px 12px; border-radius:10px; color:var(--text); cursor:pointer;
     }
 
-    .avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 3px solid #7f00ff;
-      box-shadow: 0 0 20px #7f00ff;
-    }
-
-    .username {
-      font-size: 28px;
-      font-weight: bold;
-      color: #eaeaea;
-    }
-
-    .roles-title {
-      font-size: 26px;
-      margin-top: 20px;
-      color: #d28cff;
-      text-shadow: 0 0 15px #7f00ff;
-    }
-
-    .role {
-      display: inline-block;
-      margin: 6px 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-weight: 600;
-      font-size: 16px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
+    .card {
+      background: var(--card-bg);
+      border-radius:14px; padding:20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
       backdrop-filter: blur(10px);
     }
 
-    .error {
-      color: #ffb4b4;
-      font-size: 18px;
-      margin-top: 10px;
-    }
+    .user-row { display:flex; gap:18px; align-items:center; margin-bottom:12px; }
+    .avatar { width:96px; height:96px; border-radius:50%; border:3px solid var(--accent); object-fit:cover; }
+    .username { font-size:20px; font-weight:700; color:var(--text); }
+    .sub { color:var(--muted); font-size:14px; }
+
+    .roles { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
+    .role { padding:8px 12px; border-radius:999px; font-weight:600; background:rgba(255,255,255,0.12); color:#071022; }
+
+    .error { color:#ff6b6b; margin-top:8px; }
+
+    .lang-toggle, .theme-toggle { display:flex; gap:6px; align-items:center; }
+    .small { font-size:13px; color:var(--muted); }
+
+    footer { margin-top:18px; color:var(--muted); font-size:13px; text-align:center; }
   </style>
 </head>
-
 <body>
-  <div class="container">
+  <div class="container" id="app">
+    <div class="header">
+      <div>
+        <div class="title" id="brand">Archnemesis</div>
+        <div class="small" id="tagline">Panel użytkownika</div>
+      </div>
 
-    <h1 class="title">Panel Archnemesis</h1>
+      <div class="controls">
+        <div class="lang-toggle">
+          <button class="btn" id="lang-pl">PL</button>
+          <button class="btn" id="lang-en">EN</button>
+        </div>
+
+        <div class="theme-toggle">
+          <button class="btn" id="theme-toggle">Dark</button>
+        </div>
+
+        <button class="btn" id="logout">Wyloguj</button>
+      </div>
+    </div>
 
     <div class="card">
       <div id="status">Ładowanie danych...</div>
 
-      <div id="userBox" class="user-box" style="display:none;">
-        <img id="avatar" class="avatar" src="" alt="avatar">
-        <div class="username" id="username"></div>
+      <div id="userArea" style="display:none;">
+        <div class="user-row">
+          <img id="avatar" class="avatar" src="" alt="avatar">
+          <div>
+            <div class="username" id="username"></div>
+            <div class="sub" id="user-sub"></div>
+          </div>
+        </div>
+
+        <div class="sub" id="roles-title">Twoje rangi:</div>
+        <div class="roles" id="roles"></div>
       </div>
 
-      <div class="roles-title">Twoje rangi:</div>
-      <div id="roles"></div>
+      <div id="errorBox" style="display:none;" class="error"></div>
     </div>
 
+    <footer id="footer">© Archnemesis</footer>
   </div>
 
   <script>
@@ -128,50 +132,125 @@
     };
 
     const statusEl = document.getElementById("status");
-    const rolesEl = document.getElementById("roles");
-    const userBox = document.getElementById("userBox");
+    const userArea = document.getElementById("userArea");
     const avatarEl = document.getElementById("avatar");
     const usernameEl = document.getElementById("username");
+    const userSubEl = document.getElementById("user-sub");
+    const rolesEl = document.getElementById("roles");
+    const errorBox = document.getElementById("errorBox");
+    const langPlBtn = document.getElementById("lang-pl");
+    const langEnBtn = document.getElementById("lang-en");
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    const logoutBtn = document.getElementById("logout");
+    const brandEl = document.getElementById("brand");
+    const taglineEl = document.getElementById("tagline");
+    const rolesTitleEl = document.getElementById("roles-title");
+    const footerEl = document.getElementById("footer");
 
-    // NOWE — token z cookie, nie z URL
+    const TEXT = {
+      pl: {
+        loading: "Ładowanie danych...",
+        noToken: "Brak sesji. Zaloguj się przez Discord.",
+        loggedAs: "Zalogowany jako",
+        noRoles: "Brak ról lub bot nie widzi członków serwera.",
+        logout: "Wyloguj",
+        panelTitle: "Panel użytkownika",
+        rolesTitle: "Twoje rangi:",
+        brand: "Archnemesis",
+        footer: "© Archnemesis"
+      },
+      en: {
+        loading: "Loading data...",
+        noToken: "No session. Log in with Discord.",
+        loggedAs: "Logged in as",
+        noRoles: "No roles or bot cannot see server members.",
+        logout: "Logout",
+        panelTitle: "User Panel",
+        rolesTitle: "Your ranks:",
+        brand: "Archnemesis",
+        footer: "© Archnemesis"
+      }
+    };
+
+    let LANG = localStorage.getItem("archnem_lang") || "pl";
+    let THEME = localStorage.getItem("archnem_theme") || "dark";
+
+    function applyLang() {
+      const t = TEXT[LANG];
+      statusEl.textContent = t.loading;
+      taglineEl.textContent = t.panelTitle;
+      rolesTitleEl.textContent = t.rolesTitle;
+      brandEl.textContent = t.brand;
+      footerEl.textContent = t.footer;
+      logoutBtn.textContent = t.logout;
+      themeToggleBtn.textContent = THEME === "dark" ? (LANG === "pl" ? "Ciemny" : "Dark") : (LANG === "pl" ? "Jasny" : "Light");
+    }
+
+    function applyTheme() {
+      document.documentElement.setAttribute("data-theme", THEME === "dark" ? "dark" : "light");
+      themeToggleBtn.textContent = THEME === "dark" ? (LANG === "pl" ? "Ciemny" : "Dark") : (LANG === "pl" ? "Jasny" : "Light");
+    }
+
+    langPlBtn.addEventListener("click", () => { LANG = "pl"; localStorage.setItem("archnem_lang", LANG); applyLang(); applyTheme(); });
+    langEnBtn.addEventListener("click", () => { LANG = "en"; localStorage.setItem("archnem_lang", LANG); applyLang(); applyTheme(); });
+
+    themeToggleBtn.addEventListener("click", () => {
+      THEME = THEME === "dark" ? "light" : "dark";
+      localStorage.setItem("archnem_theme", THEME);
+      applyTheme();
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      window.location.href = "/api/logout";
+    });
+
+    applyLang();
+    applyTheme();
+
     fetch("/api/user")
       .then(r => r.json())
       .then(data => {
         if (data.error) {
-          statusEl.innerHTML = '<span class="error">Błąd: ' + data.error + '</span>';
+          statusEl.textContent = TEXT[LANG].noToken;
+          errorBox.style.display = "block";
+          errorBox.textContent = data.error;
           return;
         }
 
-        userBox.style.display = "flex";
-        avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
-        usernameEl.textContent = `${data.username}#${data.discriminator}`;
+        userArea.style.display = "block";
+        statusEl.textContent = `${TEXT[LANG].loggedAs} ${data.username}#${data.discriminator}`;
 
-        statusEl.innerHTML = "Dane załadowane.";
+        if (data.avatar) {
+          avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
+        } else {
+          avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
+        }
+
+        usernameEl.textContent = `${data.username}#${data.discriminator}`;
+        userSubEl.textContent = "";
 
         const roleIds = Array.isArray(data.roles) ? data.roles : [];
-
         if (!roleIds.length) {
-          rolesEl.innerHTML = '<div class="error">Brak ról lub bot nie widzi członków serwera.</div>';
+          rolesEl.innerHTML = `<div class="error">${TEXT[LANG].noRoles}</div>`;
           return;
         }
 
         rolesEl.innerHTML = "";
-
         roleIds.forEach(roleId => {
           const def = ROLE_DEFS[roleId];
           if (!def || def.hidden) return;
-
-          const el = document.createElement("span");
+          const el = document.createElement("div");
           el.className = "role";
           el.textContent = def.name;
           el.style.background = def.color;
-          el.style.color = "#071022";
           rolesEl.appendChild(el);
         });
       })
       .catch(err => {
         console.error(err);
-        statusEl.innerHTML = '<span class="error">Błąd ładowania danych.</span>';
+        statusEl.textContent = TEXT[LANG].noToken;
+        errorBox.style.display = "block";
+        errorBox.textContent = "Network error";
       });
   </script>
 </body>
