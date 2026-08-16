@@ -112,7 +112,6 @@
   </div>
 
   <script>
-    // Mapa ról
     const ROLE_DEFS = {
       "1532749280220024842": { name: "Premium", color: "#FFD700", hidden: false },
       "1536693194744660039": { name: "Beta", color: "#C060FF", hidden: false },
@@ -134,7 +133,7 @@
     const avatarEl = document.getElementById("avatar");
     const usernameEl = document.getElementById("username");
 
-    // Pobieramy dane użytkownika BEZ tokena w URL — cookie HttpOnly
+    // NOWE — token z cookie, nie z URL
     fetch("/api/user")
       .then(r => r.json())
       .then(data => {
@@ -143,14 +142,12 @@
           return;
         }
 
-        // Wyświetl dane użytkownika
         userBox.style.display = "flex";
         avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
         usernameEl.textContent = `${data.username}#${data.discriminator}`;
 
         statusEl.innerHTML = "Dane załadowane.";
 
-        // Wyświetl role
         const roleIds = Array.isArray(data.roles) ? data.roles : [];
 
         if (!roleIds.length) {
