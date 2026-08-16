@@ -625,5 +625,44 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+
+<script type="module">
+  import { ROLE_DEFS } from "/components/roles.js";
+
+  const url = new URL(window.location.href);
+  const token = url.searchParams.get("access_token");
+
+  const rolesContainer = document.getElementById("roles");
+
+  if (!token) {
+    rolesContainer.innerText = "Brak tokena – zaloguj się przez Discord.";
+  } else {
+    fetch(`/api/user?access_token=${token}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.roles || !data.roles.length) {
+          rolesContainer.innerText = "Brak ról lub bot nie widzi członków.";
+          return;
+        }
+
+        rolesContainer.innerHTML = "";
+
+        data.roles.forEach(roleId => {
+          const def = ROLE_DEFS[roleId];
+          if (!def || def.hidden) return;
+
+          const el = document.createElement("div");
+          el.textContent = def.name;
+          el.style.color = def.color;
+          rolesContainer.appendChild(el);
+        });
+      })
+      .catch(err => {
+        rolesContainer.innerText = "Błąd ładowania danych.";
+        console.error(err);
+      });
+  }
+</script>
+
 </body>
 </html>
