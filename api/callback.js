@@ -19,16 +19,15 @@ export default async function handler(req, res) {
     });
 
     const tokenData = await tokenResponse.json();
-
     if (!tokenData || !tokenData.access_token) {
       return res.redirect("/panel.html?error=token_failed");
     }
 
-    // ustaw cookie HttpOnly, Secure, SameSite=Strict
+    // ustaw cookie HttpOnly; SameSite=None; Secure
     const maxAge = 60 * 60; // 1h
     res.setHeader(
       "Set-Cookie",
-      `archnem_token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${maxAge}`
+      `archnem_token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${maxAge}`
     );
 
     return res.redirect("/panel.html");
