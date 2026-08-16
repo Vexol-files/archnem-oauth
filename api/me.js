@@ -6,7 +6,6 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "No token provided" });
   }
 
-  // próbujemy pobrać usera z Discorda tym tokenem
   const userRes = await fetch("https://discord.com/api/users/@me", {
     headers: { Authorization: `Bearer ${token}` }
   });
