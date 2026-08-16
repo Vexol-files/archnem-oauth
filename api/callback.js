@@ -19,15 +19,11 @@ export default async function handler(req, res) {
   const tokenData = await tokenRes.json();
   if (!tokenData.access_token) return res.status(500).send("Failed to get access token");
 
-  const userRes = await fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${tokenData.access_token}` }
-  });
-  const user = await userRes.json();
-
-  // na start: token sesji = access_token (później można zrobić JWT)
   const sessionToken = tokenData.access_token;
 
-  // przekierowanie na archnem.xo.je z tokenem w URL
-  const redirectUrl = `https://archnem.xo.je/panel.html?token=${encodeURIComponent(sessionToken)}`;
-  return res.redirect(redirectUrl);
+  // zapis tokenu w cookie (domena vercel)
+  res.setHeader("Set-Cookie", `archnem_token=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax`);
+
+  // przekierowanie na panel na Vercel
+  return res.redirect("/panel");
 }
