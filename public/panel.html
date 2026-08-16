@@ -69,7 +69,6 @@
   </div>
 
   <script>
-    // Role map
     const ROLE_DEFS = {
       "1532749280220024842": { name: "Premium", color: "#FFD700", hidden: false },
       "1536693194744660039": { name: "Beta", color: "#C060FF", hidden: false },
@@ -85,7 +84,6 @@
       "1534494523768569897": { name: "Owner Bot", color: "#8B0000", hidden: true }
     };
 
-    // Elements
     const statusEl = document.getElementById("status");
     const userArea = document.getElementById("userArea");
     const avatarEl = document.getElementById("avatar");
@@ -127,7 +125,6 @@
       }
     };
 
-    // State
     let LANG = localStorage.getItem("archnem_lang") || "pl";
     let THEME = localStorage.getItem("archnem_theme") || "dark";
 
@@ -157,34 +154,30 @@
     });
 
     logoutBtn.addEventListener("click", () => {
-      // clear sessionStorage and redirect to main site
       sessionStorage.removeItem("archnem_token");
-      window.location.href = "/api/logout"; // backend will redirect to archnem.xo.je if configured
+      window.location.href = "/api/logout";
     });
 
     applyLang();
     applyTheme();
 
     // --- Token handling without cookie ---
-    // 1) If access_token present in URL, copy to sessionStorage and remove from URL
-    const url = new URL(window.location.href);
-    const urlToken = url.searchParams.get("access_token");
-    if (urlToken) {
-      sessionStorage.setItem("archnem_token", urlToken);
-      // remove token from URL to avoid leaking in history
-      url.searchParams.delete("access_token");
-      window.history.replaceState({}, document.title, url.pathname + url.search);
-    }
+    (function handleTokenInUrl() {
+      const url = new URL(window.location.href);
+      const urlToken = url.searchParams.get("access_token");
+      if (urlToken) {
+        sessionStorage.setItem("archnem_token", urlToken);
+        url.searchParams.delete("access_token");
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+      }
+    })();
 
-    // 2) Use token from sessionStorage
     const token = sessionStorage.getItem("archnem_token");
     if (!token) {
       statusEl.textContent = TEXT[LANG].noSession;
       errorBox.style.display = "block";
       errorBox.textContent = TEXT[LANG].noSession;
     } else {
-      // call backend /api/user and pass token as query param (server expects it)
-      // we pass token in query so backend can use it; avoid exposing BOT_TOKEN in frontend
       fetch(`/api/user?access_token=${encodeURIComponent(token)}`)
         .then(r => r.json())
         .then(data => {
