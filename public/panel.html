@@ -1,668 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<title>Archnemesis Panel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-:root {
-    --bg: #05060a;
-    --bg-alt: #070814;
-    --card: #0b0f1a;
-    --accent: #7b3fff;
-    --accent-soft: rgba(123,63,255,0.35);
-    --accent-soft2: rgba(123,63,255,0.18);
-    --text-main: #f5f5ff;
-    --text-muted: #9aa0c2;
-    --border-soft: rgba(255,255,255,0.06);
-}
-
-.light {
-    --bg: #f5f5ff;
-    --bg-alt: #e9ebff;
-    --card: #ffffff;
-    --accent: #7b3fff;
-    --accent-soft: rgba(123,63,255,0.25);
-    --accent-soft2: rgba(123,63,255,0.12);
-    --text-main: #0b0f1a;
-    --text-muted: #444;
-    --border-soft: rgba(0,0,0,0.08);
-}
-
-* {
-    box-sizing:border-box;
-}
-
-body {
-    margin:0;
-    min-height:100vh;
-    background:radial-gradient(circle at top, #151a2f 0, var(--bg) 55%);
-    color:var(--text-main);
-    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-/* TOP BAR */
-
-.topbar {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:18px 24px;
-}
-
-.user-info {
-    display:flex;
-    align-items:center;
-    gap:12px;
-}
-
-.user-info img {
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    box-shadow:0 0 12px rgba(0,0,0,0.6);
-}
-
-.user-info-name {
-    font-size:14px;
-    font-weight:500;
-}
-
-/* Buttons top-right */
-
-.top-buttons {
-    display:flex;
-    gap:10px;
-    align-items:center;
-}
-
-.btn {
-    padding:8px 14px;
-    border-radius:999px;
-    border:none;
-    background:var(--accent);
-    color:#fff;
-    cursor:pointer;
-    font-size:13px;
-    font-weight:500;
-    box-shadow:0 0 20px var(--accent-soft);
-    transition:transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-}
-
-.btn:hover {
-    transform:translateY(-1px);
-    box-shadow:0 0 26px var(--accent-soft);
-}
-
-.mode-btn {
-    background:#333;
-    box-shadow:0 0 16px rgba(0,0,0,0.6);
-}
-
-/* Roles row */
-
-.roles {
-    display:flex;
-    gap:8px;
-    align-items:center;
-    padding:0 24px 10px 24px;
-    justify-content:flex-end;
-}
-
-.role {
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:600;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    background:rgba(255,255,255,0.02);
-    border:1px solid var(--border-soft);
-}
-
-.circle {
-    width:10px;
-    height:10px;
-    border-radius:50%;
-}
-
-/* Kolory rolek */
-
-.premium { background:#ffd500; }
-.beta { background:#ffe766; }
-.booster { background:#d26bff; }
-.trusted { background:#ffb3b3; }
-.moderator { background:#6ecbff; }
-.admin { background:#ff6b6b; }
-.headadmin { background:#ff3b3b; }
-.coowner { background:#ff3b3b; }
-.owner { background:#ff3b3b; }
-.ownerdark { background:#b30000; }
-
-/* MAIN LAYOUT */
-
-.main-wrapper {
-    display:flex;
-    padding:0 24px 24px 24px;
-    gap:18px;
-}
-
-/* Sidebar (left) */
-
-.sidebar {
-    width:240px;
-    background:var(--card);
-    border-radius:20px;
-    padding:18px 16px;
-    box-shadow:0 0 24px rgba(0,0,0,0.6);
-    border:1px solid var(--border-soft);
-}
-
-.sidebar-title {
-    font-size:13px;
-    text-transform:uppercase;
-    letter-spacing:0.12em;
-    margin-bottom:12px;
-    color:var(--text-muted);
-}
-
-.sidebar-menu {
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-}
-
-.sidebar-item {
-    padding:8px 10px;
-    border-radius:12px;
-    font-size:13px;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    color:var(--text-muted);
-    transition:background 0.12s ease, color 0.12s ease, transform 0.12s ease;
-}
-
-.sidebar-item:hover {
-    background:rgba(255,255,255,0.04);
-    transform:translateX(2px);
-}
-
-.sidebar-item.active {
-    background:var(--accent-soft2);
-    color:var(--text-main);
-}
-
-.sidebar-dot {
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:var(--accent);
-}
-
-/* Content area (right) */
-
-.content {
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-}
-
-/* Top info card */
-
-.info-card {
-    background:var(--card);
-    border-radius:20px;
-    padding:18px 18px;
-    border:1px solid var(--border-soft);
-    box-shadow:0 0 24px rgba(0,0,0,0.5);
-}
-
-.info-title {
-    font-size:16px;
-    font-weight:600;
-    margin-bottom:8px;
-}
-
-.info-sub {
-    font-size:13px;
-    color:var(--text-muted);
-}
-
-/* Main panel card */
-
-.panel-card {
-    background:var(--card);
-    border-radius:24px;
-    padding:24px 22px;
-    border:1px solid var(--border-soft);
-    box-shadow:0 0 40px rgba(0,0,0,0.7), 0 0 60px var(--accent-soft);
-}
-
-.panel-header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:12px;
-}
-
-.panel-title {
-    font-size:18px;
-    font-weight:600;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-}
-
-.panel-badge {
-    padding:4px 10px;
-    border-radius:999px;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.08em;
-    background:var(--accent-soft2);
-    border:1px solid var(--accent-soft);
-    color:var(--accent);
-}
-
-.panel-status {
-    font-size:13px;
-    color:var(--text-muted);
-    margin-bottom:16px;
-}
-
-/* Tab content */
-
-.tab-content {
-    margin-top:10px;
-    font-size:14px;
-}
-
-/* Informations tab */
-
-.info-grid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px 18px;
-    margin-top:8px;
-}
-
-.info-label {
-    font-size:12px;
-    color:var(--text-muted);
-}
-
-.info-value {
-    font-size:13px;
-    font-weight:500;
-}
-
-/* Account tab */
-
-.account-section {
-    margin-top:8px;
-}
-
-.account-row {
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:6px;
-    font-size:13px;
-}
-
-/* Roles tab */
-
-.roles-list {
-    margin-top:8px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-}
-
-/* Settings tab */
-
-.settings-section {
-    margin-top:8px;
-    font-size:13px;
-}
-
-/* Responsive */
-
-@media (max-width: 800px) {
-    .main-wrapper {
-        flex-direction:column;
-    }
-    .sidebar {
-        width:100%;
-    }
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Archnem Panel</title>
+  <style>
+    body { font-family: Inter, system-ui, Arial; padding: 24px; background:#0f172a; color:#e6eef8; }
+    .card { background:#0b1220; padding:16px; border-radius:8px; max-width:720px; margin:12px 0; }
+    .role { display:inline-block; margin:6px 8px; padding:6px 10px; border-radius:999px; font-weight:600; }
+    .error { color:#ffb4b4; }
+  </style>
 </head>
-
 <body>
+  <h1>Panel Archnem</h1>
 
-<!-- TOP BAR -->
-<div class="topbar">
-    <div class="user-info" id="user-info">
-        <!-- avatar + nick -->
-    </div>
+  <div class="card">
+    <div id="status">Ładowanie...</div>
+    <div id="roles" style="margin-top:12px"></div>
+  </div>
 
-    <div class="top-buttons">
-        <button class="btn" onclick="logout()">Logout</button>
-        <button class="btn mode-btn" onclick="toggleMode()">Tryb jasny/ciemny</button>
-    </div>
-</div>
+  <script>
+    // Lokalna mapa ról dla statycznego panelu
+    const ROLE_DEFS = {
+      "1532749280220024842": { name: "Premium", color: "#FFD700", hidden: false },
+      "1536693194744660039": { name: "Beta", color: "#C060FF", hidden: false },
+      "1534495312377417868": { name: "Booster", color: "#8A2BE2", hidden: false },
 
-<!-- ROLES ROW -->
-<div class="roles" id="roles">
-    <!-- role badges -->
-</div>
+      "1534495410566201427": { name: "Trusted", color: "#FFCCCC", hidden: true },
+      "1532716147093274685": { name: "Moderator", color: "#4FC3F7", hidden: true },
+      "1536692816284094554": { name: "Admin", color: "#FF6666", hidden: true },
+      "1536692884928208936": { name: "HeadAdmin", color: "#FF0000", hidden: true },
+      "1532711838264066129": { name: "Co-Owner", color: "#FF0000", hidden: true },
 
-<!-- MAIN LAYOUT -->
-<div class="main-wrapper">
+      "1529827656428818492": { name: "Owner", color: "#FF0000", hidden: true },
+      "1534494523768569897": { name: "Owner Bot", color: "#8B0000", hidden: true }
+    };
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="sidebar-title">Menu</div>
-        <div class="sidebar-menu">
-            <div class="sidebar-item active" data-tab="informations">
-                <div class="sidebar-dot"></div>
-                <span>Informations</span>
-            </div>
-            <div class="sidebar-item" data-tab="account">
-                <div class="sidebar-dot"></div>
-                <span>Account</span>
-            </div>
-            <div class="sidebar-item" data-tab="roles">
-                <div class="sidebar-dot"></div>
-                <span>Roles</span>
-            </div>
-            <div class="sidebar-item" data-tab="settings">
-                <div class="sidebar-dot"></div>
-                <span>Settings</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- CONTENT -->
-    <div class="content">
-
-        <!-- INFO CARD -->
-        <div class="info-card">
-            <div class="info-title">Archnemesis Panel</div>
-            <div class="info-sub" id="info-sub">
-                Dane pobrane z Discord OAuth2. Kliknij „Informations”, aby zobaczyć szczegóły konta.
-            </div>
-        </div>
-
-        <!-- MAIN PANEL CARD -->
-        <div class="panel-card">
-            <div class="panel-header">
-                <div class="panel-title">ARCHNEMESIS PANEL</div>
-                <div class="panel-badge">DISCORD OAUTH2</div>
-            </div>
-            <div class="panel-status" id="status">Ładuję dane...</div>
-
-            <!-- TAB CONTENT -->
-            <div class="tab-content" id="tab-content">
-                <!-- domyślnie: informations -->
-            </div>
-        </div>
-
-    </div>
-
-</div>
-
-<script>
-function toggleMode() {
-    document.body.classList.toggle("light");
-}
-
-function logout() {
-    document.cookie = "archnem_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = "https://archnem.xo.je/";
-}
-
-// definicja ról (ID -> nazwa + klasa)
-const ROLE_DEFS = {
-    "1532749280220024842": {name:"Premium", class:"premium"},
-    "1536693194744660039": {name:"Beta", class:"beta"},
-    "1534495312377417868": {name:"Booster", class:"booster"},
-    "1534495410566201427": {name:"Trusted", class:"trusted"},
-    "1532716147093274685": {name:"Moderator", class:"moderator"},
-    "1536692816284094554": {name:"Admin", class:"admin"},
-    "1536692884928208936": {name:"HeadAdmin", class:"headadmin"},
-    "1532711838264066129": {name:"Co-Owner", class:"coowner"},
-    "1529827656428818492": {name:"Owner", class:"owner"},
-    "1534494523768569897": {name:"Owner Dark", class:"ownerdark"}
-};
-
-let USER_DATA = null;
-
-// ładowanie danych użytkownika z /api/user
-async function loadUser() {
     const statusEl = document.getElementById("status");
-    const userInfo = document.getElementById("user-info");
     const rolesEl = document.getElementById("roles");
 
-    try {
-        const res = await fetch("/api/user");
-        if (!res.ok) {
-            statusEl.innerHTML = "Błąd ładowania danych (" + res.status + ")";
+    const url = new URL(window.location.href);
+    const token = url.searchParams.get("access_token");
+    const error = url.searchParams.get("error");
+
+    if (error) {
+      statusEl.innerHTML = '<span class="error">Błąd: ' + error + '</span>';
+    }
+
+    if (!token) {
+      statusEl.innerHTML = 'Brak tokena. <a href="/login.html">Zaloguj się przez Discord</a>';
+      rolesEl.innerHTML = '';
+    } else {
+      statusEl.innerText = 'Pobieram dane użytkownika...';
+      fetch(`/api/user?access_token=${encodeURIComponent(token)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.error) {
+            statusEl.innerHTML = '<span class="error">Błąd: ' + (data.error || 'nieznany') + '</span>';
             return;
-        }
+          }
 
-        const data = await res.json();
-        USER_DATA = data;
+          statusEl.innerText = `Zalogowany jako ${data.username}#${data.discriminator}`;
 
-        // avatar
-        const avatarURL = data.avatar
-            ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`
-            : "https://cdn.discordapp.com/embed/avatars/0.png";
-
-        userInfo.innerHTML = `
-            <img src="${avatarURL}">
-            <div class="user-info-name">${data.username}#${data.discriminator}</div>
-        `;
-
-        statusEl.innerHTML = "Zalogowano.";
-
-        // role z backendu (MUSI być data.roles = ["id1","id2",...])
-        const userRoles = Array.isArray(data.roles) ? data.roles : [];
-
-        rolesEl.innerHTML = "";
-        for (const roleId of userRoles) {
-            if (ROLE_DEFS[roleId]) {
-                const r = ROLE_DEFS[roleId];
-                rolesEl.innerHTML += `
-                    <div class="role">
-                        <div class="circle ${r.class}"></div>
-                        ${r.name}
-                    </div>
-                `;
-            }
-        }
-
-        // ustaw domyślną zakładkę
-        renderTab("informations");
-
-    } catch (e) {
-        statusEl.innerHTML = "Błąd ładowania danych (exception)";
-        console.log(e);
-    }
-}
-
-// renderowanie zakładek
-
-function renderTab(tab) {
-    const tabContent = document.getElementById("tab-content");
-    const infoSub = document.getElementById("info-sub");
-
-    // podświetlenie menu
-    document.querySelectorAll(".sidebar-item").forEach(el => {
-        if (el.getAttribute("data-tab") === tab) {
-            el.classList.add("active");
-        } else {
-            el.classList.remove("active");
-        }
-    });
-
-    if (!USER_DATA) {
-        tabContent.innerHTML = "<p>Brak danych użytkownika. Spróbuj odświeżyć stronę.</p>";
-        return;
-    }
-
-    if (tab === "informations") {
-        infoSub.innerHTML = "Podstawowe informacje o Twoim koncie Discord i statusie w Archnemesis.";
-        tabContent.innerHTML = `
-            <div class="info-grid">
-                <div>
-                    <div class="info-label">Nick</div>
-                    <div class="info-value">${USER_DATA.username}#${USER_DATA.discriminator}</div>
-                </div>
-                <div>
-                    <div class="info-label">ID</div>
-                    <div class="info-value">${USER_DATA.id}</div>
-                </div>
-                <div>
-                    <div class="info-label">Email</div>
-                    <div class="info-value">${USER_DATA.email || "nie ustawiono"}</div>
-                </div>
-                <div>
-                    <div class="info-label">Wiek</div>
-                    <div class="info-value">${USER_DATA.age || "nie podano"}</div>
-                </div>
-                <div>
-                    <div class="info-label">Premium</div>
-                    <div class="info-value">${USER_DATA.premium ? "TAK" : "NIE"}</div>
-                </div>
-                <div>
-                    <div class="info-label">Role (liczba)</div>
-                    <div class="info-value">${Array.isArray(USER_DATA.roles) ? USER_DATA.roles.length : 0}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    if (tab === "account") {
-        infoSub.innerHTML = "Szczegóły konta i konfiguracja podstawowych danych.";
-        tabContent.innerHTML = `
-            <div class="account-section">
-                <div class="account-row">
-                    <span>Nick</span>
-                    <span>${USER_DATA.username}#${USER_DATA.discriminator}</span>
-                </div>
-                <div class="account-row">
-                    <span>ID</span>
-                    <span>${USER_DATA.id}</span>
-                </div>
-                <div class="account-row">
-                    <span>Email</span>
-                    <span>${USER_DATA.email || "nie ustawiono"}</span>
-                </div>
-                <div class="account-row">
-                    <span>Wiek</span>
-                    <span>${USER_DATA.age || "nie podano"}</span>
-                </div>
-                <div class="account-row">
-                    <span>Premium</span>
-                    <span>${USER_DATA.premium ? "TAK" : "NIE"}</span>
-                </div>
-            </div>
-        `;
-    }
-
-    if (tab === "roles") {
-        infoSub.innerHTML = "Role przypisane do Twojego konta. Wyświetlane tylko te, które faktycznie masz.";
-        const userRoles = Array.isArray(USER_DATA.roles) ? USER_DATA.roles : [];
-        if (!userRoles.length) {
-            tabContent.innerHTML = "<p>Brak przypisanych ról lub backend nie zwraca listy ról.</p>";
+          const roleIds = Array.isArray(data.roles) ? data.roles : [];
+          if (!roleIds.length) {
+            rolesEl.innerHTML = '<div class="error">Brak ról lub bot nie widzi członków serwera.</div>';
             return;
-        }
+          }
 
-        let html = `<div class="roles-list">`;
-        for (const roleId of userRoles) {
-            if (ROLE_DEFS[roleId]) {
-                const r = ROLE_DEFS[roleId];
-                html += `
-                    <div class="role">
-                        <div class="circle ${r.class}"></div>
-                        ${r.name} <span style="font-size:10px;color:var(--text-muted);">(${roleId})</span>
-                    </div>
-                `;
-            }
-        }
-        html += `</div>`;
-        tabContent.innerHTML = html;
-    }
-
-    if (tab === "settings") {
-        infoSub.innerHTML = "Ustawienia panelu Archnemesis (tryb jasny/ciemny, wylogowanie, itp.).";
-        tabContent.innerHTML = `
-            <div class="settings-section">
-                <p>• Tryb jasny/ciemny możesz przełączać przyciskiem w prawym górnym rogu.</p>
-                <p>• Wylogowanie czyści cookie sesji i przenosi Cię na stronę archnem.xo.je.</p>
-                <p>• Role są pobierane z backendu – jeśli masz role, a ich nie widzisz, upewnij się, że endpoint <code>/api/user</code> zwraca tablicę <code>roles</code> z ID ról.</p>
-            </div>
-        `;
-    }
-}
-
-// obsługa kliknięć w menu
-
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".sidebar-item").forEach(el => {
-        el.addEventListener("click", () => {
-            const tab = el.getAttribute("data-tab");
-            renderTab(tab);
+          rolesEl.innerHTML = '';
+          roleIds.forEach(roleId => {
+            const def = ROLE_DEFS[roleId];
+            if (!def) return;
+            if (def.hidden) return; // ukryte role nie są pokazywane
+            const el = document.createElement('span');
+            el.className = 'role';
+            el.textContent = def.name;
+            el.style.background = def.color;
+            el.style.color = '#071022';
+            rolesEl.appendChild(el);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          statusEl.innerHTML = '<span class="error">Błąd ładowania danych.</span>';
         });
-    });
-
-    loadUser();
-});
-</script>
-
-
-<script type="module">
-  import { ROLE_DEFS } from "/components/roles.js";
-
-  const url = new URL(window.location.href);
-  const token = url.searchParams.get("access_token");
-
-  const rolesContainer = document.getElementById("roles");
-
-  if (!token) {
-    rolesContainer.innerText = "Brak tokena – zaloguj się przez Discord.";
-  } else {
-    fetch(`/api/user?access_token=${token}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.roles || !data.roles.length) {
-          rolesContainer.innerText = "Brak ról lub bot nie widzi członków.";
-          return;
-        }
-
-        rolesContainer.innerHTML = "";
-
-        data.roles.forEach(roleId => {
-          const def = ROLE_DEFS[roleId];
-          if (!def || def.hidden) return;
-
-          const el = document.createElement("div");
-          el.textContent = def.name;
-          el.style.color = def.color;
-          rolesContainer.appendChild(el);
-        });
-      })
-      .catch(err => {
-        rolesContainer.innerText = "Błąd ładowania danych.";
-        console.error(err);
-      });
-  }
-</script>
-
+    }
+  </script>
 </body>
 </html>
