@@ -1,66 +1,30 @@
-<!doctype html>
-<html lang="pl">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Panel</title></head>
-<body>
-  <h1>Panel</h1>
-  <div id="status">Ładowanie...</div>
-  <div id="user"></div>
-  <button id="logout">Wyloguj</button>
-
-  <script>
-    // 1) Jeśli token pojawił się w URL (param token), przenieś go do sessionStorage i natychmiast usuń z URL
-    (function handleUrlToken() {
-      try {
-        const url = new URL(window.location.href);
-        const urlToken = url.searchParams.get("token");
-        if (urlToken) {
-          // store temporarily in sessionStorage (not persistent)
-          sessionStorage.setItem("archnem_token", urlToken);
-          // remove token from URL
-          url.searchParams.delete("token");
-          window.history.replaceState({}, document.title, url.pathname + url.search);
-        }
-      } catch (e) { /* ignore */ }
-    })();
-
-    // 2) Try to fetch user via server endpoint (cookie 'token' will be sent automatically)
-    async function loadUser() {
-      try {
-        const r = await fetch("/api/user");
-        if (!r.ok) {
-          const body = await r.json().catch(()=>({}));
-          throw new Error(body.error || "Server error");
-        }
-        const data = await r.json();
-        document.getElementById("status").textContent = `Zalogowany jako ${data.username}#${data.discriminator}`;
-        document.getElementById("user").textContent = `Rangi: ${Array.isArray(data.roles) ? data.roles.join(", ") : "brak"}`;
-      } catch (err) {
-        console.error(err);
-        // If cookie not present, but we have session token from URL, try to call /api/user with that token as query once (fallback)
-        const sessionToken = sessionStorage.getItem("archnem_token");
-        if (sessionToken) {
-          try {
-            const r2 = await fetch(`/api/user?access_token=${encodeURIComponent(sessionToken)}`);
-            if (r2.ok) {
-              const d = await r2.json();
-              document.getElementById("status").textContent = `Zalogowany jako ${d.username}#${d.discriminator}`;
-              document.getElementById("user").textContent = `Rangi: ${Array.isArray(d.roles) ? d.roles.join(", ") : "brak"}`;
-              // optionally set cookie by calling a server endpoint to set cookie (not included here)
-              return;
-            }
-          } catch(e) { /* ignore */ }
-        }
-
-        document.getElementById("status").textContent = "Brak sesji. Zaloguj się przez Discord.";
+<script>
+  // dodatkowa ochrona: usuń token z URL jeśli przypadkowo się pojawił
+  (function removeTokenFromUrl() {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("token") || url.searchParams.has("access_token")) {
+        url.searchParams.delete("token");
+        url.searchParams.delete("access_token");
+        window.history.replaceState({}, document.title, url.pathname + url.search);
       }
-    }
+    } catch (e) {}
+  })();
 
-    loadUser();
-
-    document.getElementById("logout").addEventListener("click", () => {
-      try { sessionStorage.removeItem("archnem_token"); } catch(e){}
-      window.location.href = "/api/logout";
+  // pobierz usera (cookie HttpOnly wysyłane automatycznie)
+  fetch("/api/user")
+    .then(async r => {
+      if (!r.ok) {
+        const body = await r.json().catch(()=>({}));
+        throw new Error(body.error || "Server error");
+      }
+      return r.json();
+    })
+    .then(data => {
+      // renderuj usera
+    })
+    .catch(err => {
+      console.error(err);
+      // pokaż link do logowania: /api/login
     });
-  </script>
-</body>
-</html>
+</script>
