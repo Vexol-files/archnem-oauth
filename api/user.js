@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Server misconfiguration" });
     }
 
-    // fetch guild roles list (to map id -> name,color)
+    // 1) Pobierz wszystkie role serwera (id, name, color, position)
     const rolesUrl = `https://discord.com/api/guilds/${process.env.GUILD_ID}/roles`;
     const rolesResp = await fetch(rolesUrl, {
       headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` }
@@ -43,22 +43,26 @@ export default async function handler(req, res) {
 
     let rolesList = [];
     if (rolesResp.status === 200) {
-      rolesList = await rolesResp.json(); // array of roles
+      rolesList = await rolesResp.json(); // array of role objects
     } else {
       console.error("Failed to fetch guild roles:", rolesResp.status, await rolesResp.text());
-      // continue — we'll still return user without role names if roles can't be fetched
+      // jeśli nie uda się pobrać ról, kontynuujemy — zwrócimy role jako ID
     }
 
-    // build map id -> { name, colorHex }
+    // build map id -> { id, name, colorHex, position }
     const roleMap = {};
     for (const r of rolesList) {
-      // Discord role color is integer; convert to hex string (6 chars) or null if 0
       const colorInt = r.color || 0;
       const hex = colorInt ? ("#" + colorInt.toString(16).padStart(6, "0")) : null;
-      roleMap[r.id] = { id: r.id, name: r.name, color: hex };
+      roleMap[r.id] = {
+        id: r.id,
+        name: r.name,
+        color: hex,
+        position: typeof r.position === "number" ? r.position : 0
+      };
     }
 
-    // fetch guild member to get user's role IDs
+    // 2) Pobierz członka serwera, aby dostać role użytkownika
     const guildMemberUrl = `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`;
     const guildResp = await fetch(guildMemberUrl, {
       headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` }
@@ -68,11 +72,15 @@ export default async function handler(req, res) {
     if (guildResp.status === 200) {
       const guildBody = await guildResp.json();
       const roleIds = Array.isArray(guildBody.roles) ? guildBody.roles : [];
-      // map to objects with name and color (fallback to id if not found)
+
+      // map to objects with name, color, position; fallback to id if not found
       userRoles = roleIds.map(rid => {
         if (roleMap[rid]) return roleMap[rid];
-        return { id: rid, name: rid, color: null };
+        return { id: rid, name: rid, color: null, position: 0 };
       });
+
+      // sort roles by position descending (highest first)
+      userRoles.sort((a, b) => (b.position || 0) - (a.position || 0));
     } else {
       // bot cannot fetch member or lacks permissions — return user without roles
       console.error("Bot cannot fetch guild member:", guildResp.status, await guildResp.text());
