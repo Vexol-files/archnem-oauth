@@ -10,6 +10,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Missing session token" });
     }
 
+    // Fetch user info
     const userResp = await fetch("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${access_token}` }
     });
@@ -24,6 +25,7 @@ export default async function handler(req, res) {
 
     const userData = await userResp.json();
 
+    // Fetch guild roles
     const rolesResp = await fetch(
       `https://discord.com/api/guilds/${process.env.GUILD_ID}/roles`,
       { headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` } }
@@ -36,6 +38,7 @@ export default async function handler(req, res) {
       roleMap[r.id] = { id: r.id, name: r.name, color: hex, position: r.position };
     }
 
+    // Fetch member roles
     const memberResp = await fetch(
       `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`,
       { headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` } }
