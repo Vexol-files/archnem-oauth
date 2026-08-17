@@ -1,8 +1,6 @@
+// /api/logout.js
 export default function handler(req, res) {
-  // Usuń cookie
-  res.setHeader(
-    "Set-Cookie",
-    "archnem_token=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"
-  );
-  return res.redirect("archnem.xo.je");
+  // Usuń cookie sesyjne i przekieruj na stronę główną
+  res.setHeader("Set-Cookie", "archnem_token=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0");
+  return res.redirect("https://archnem.xo.je");
 }
