@@ -1,3 +1,4 @@
+// /api/user.js
 export default async function handler(req, res) {
   try {
     const cookie = req.headers.cookie || "";
@@ -10,11 +11,9 @@ export default async function handler(req, res) {
     const userResp = await fetch("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${access_token}` }
     });
-
     const userData = await userResp.json();
 
     const flags = userData.public_flags || 0;
-
     const badges = [];
     if (flags & 1) badges.push("Staff");
     if (flags & 2) badges.push("Partner");
@@ -31,7 +30,6 @@ export default async function handler(req, res) {
       `https://discord.com/api/guilds/${process.env.GUILD_ID}/roles`,
       { headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` } }
     );
-
     const rolesList = await rolesResp.json();
     const roleMap = {};
     for (const r of rolesList) {
