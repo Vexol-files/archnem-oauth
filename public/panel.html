@@ -1,30 +1,106 @@
-<script>
-  // dodatkowa ochrona: usuń token z URL jeśli przypadkowo się pojawił
-  (function removeTokenFromUrl() {
-    try {
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("token") || url.searchParams.has("access_token")) {
-        url.searchParams.delete("token");
-        url.searchParams.delete("access_token");
-        window.history.replaceState({}, document.title, url.pathname + url.search);
-      }
-    } catch (e) {}
-  })();
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Panel</title>
+  <style>
+    body{font-family:Inter,Arial,Helvetica,sans-serif;background:#0b1220;color:#eaeaea;padding:28px}
+    .card{background:rgba(255,255,255,0.04);padding:18px;border-radius:12px;max-width:720px;margin:auto}
+    .btn{background:rgba(255,255,255,0.06);border:0;padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+    .avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #d28cff}
+    .roles{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .role{background:#fff;padding:6px 10px;border-radius:999px;color:#071022;font-weight:700}
+    .muted{color:#9aa6b2}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 id="status">Ładowanie...</h2>
+    <div id="userArea" style="display:none">
+      <div style="display:flex;gap:16px;align-items:center">
+        <img id="avatar" class="avatar" src="" alt="avatar">
+        <div>
+          <div id="username" style="font-weight:700;font-size:18px"></div>
+          <div id="user-sub" class="muted"></div>
+        </div>
+      </div>
 
-  // pobierz usera (cookie HttpOnly wysyłane automatycznie)
-  fetch("/api/user")
-    .then(async r => {
-      if (!r.ok) {
-        const body = await r.json().catch(()=>({}));
-        throw new Error(body.error || "Server error");
+      <div style="margin-top:12px" class="muted">Twoje rangi:</div>
+      <div class="roles" id="roles"></div>
+    </div>
+
+    <div id="errorBox" style="color:#ff6b6b;margin-top:12px;display:none"></div>
+
+    <div style="margin-top:16px">
+      <button id="logout" class="btn">Wyloguj</button>
+      <a href="/api/login" class="btn" style="margin-left:8px">Zaloguj ponownie</a>
+    </div>
+  </div>
+
+  <script>
+    // remove any token accidentally present in URL
+    (function removeTokenFromUrl() {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("token") || url.searchParams.has("access_token")) {
+          url.searchParams.delete("token");
+          url.searchParams.delete("access_token");
+          window.history.replaceState({}, document.title, url.pathname + url.search);
+        }
+      } catch(e){}
+    })();
+
+    async function loadUser() {
+      try {
+        const r = await fetch("/api/user", { credentials: "same-origin" });
+        if (!r.ok) {
+          const body = await r.json().catch(()=>({}));
+          throw new Error(body.error || "Server error");
+        }
+        const data = await r.json();
+        document.getElementById("userArea").style.display = "block";
+        document.getElementById("status").textContent = `Zalogowany jako ${data.username}#${data.discriminator}`;
+
+        const avatarEl = document.getElementById("avatar");
+        if (data.avatar) {
+          avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
+        } else {
+          avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
+        }
+
+        document.getElementById("username").textContent = `${data.username}#${data.discriminator}`;
+
+        const rolesEl = document.getElementById("roles");
+        rolesEl.innerHTML = "";
+        const roleIds = Array.isArray(data.roles) ? data.roles : [];
+        if (!roleIds.length) {
+          rolesEl.innerHTML = `<div class="muted">Brak ról</div>`;
+          return;
+        }
+        roleIds.forEach(rid => {
+          const el = document.createElement("div");
+          el.className = "role";
+          el.textContent = rid;
+          rolesEl.appendChild(el);
+        });
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").textContent = "Brak sesji. Zaloguj się przez Discord.";
+        const eb = document.getElementById("errorBox");
+        eb.style.display = "block";
+        eb.textContent = err.message || "Błąd sieci";
       }
-      return r.json();
-    })
-    .then(data => {
-      // renderuj usera
-    })
-    .catch(err => {
-      console.error(err);
-      // pokaż link do logowania: /api/login
+    }
+
+    document.getElementById("logout").addEventListener("click", () => {
+      // clear any client-side storage and call server logout
+      try { sessionStorage.removeItem("archnem_token"); } catch(e){}
+      window.location.href = "/api/logout";
     });
-</script>
+
+    // auto load
+    loadUser();
+  </script>
+</body>
+</html>
