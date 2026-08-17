@@ -3,63 +3,68 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Archnem — Panel</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Archnem Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b1220; --card:rgba(255,255,255,0.04); --muted:#9aa6b2; --accent:#7c3aed;
-      --glass: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --bg:#0b1220; --panel:#0f1724; --card:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --muted:#9aa6b2; --accent:#7c3aed; --glass:rgba(255,255,255,0.03);
+      --radius:12px;
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef8;background:linear-gradient(180deg,var(--bg),#05060a);-webkit-font-smoothing:antialiased}
-    .wrap{max-width:980px;margin:36px auto;padding:20px}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .container{max-width:1100px;margin:36px auto;padding:20px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
     .brand{display:flex;align-items:center;gap:12px}
     .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#6b21a8,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;color:white}
     .title{font-size:18px;font-weight:700;color:var(--accent)}
-    .sub{color:var(--muted);font-size:13px}
-    .controls{display:flex;gap:8px;align-items:center}
-    .btn{background:var(--card);border:0;padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
-    .grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
-    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
-    .avatar{width:88px;height:88px;border-radius:14px;object-fit:cover;border:3px solid rgba(255,255,255,0.06)}
-    .info-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .subtitle{color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:inherit;cursor:pointer}
+    .primary{background:linear-gradient(90deg,#6b21a8,#06b6d4);border:0;color:white}
+    .layout{display:grid;grid-template-columns:360px 1fr;gap:16px}
+    .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 8px 24px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+    .avatar{width:88px;height:88px;border-radius:14px;object-fit:cover;border:3px solid rgba(255,255,255,0.04)}
+    .info{display:flex;gap:12px;align-items:center}
     .muted{color:var(--muted);font-size:13px}
     .roles{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .role-pill{padding:6px 10px;border-radius:999px;font-weight:700;border:1px solid rgba(0,0,0,0.06)}
-    .role-no-color{background:rgba(255,255,255,0.03);color:#e6eef8}
+    .pill{padding:6px 10px;border-radius:999px;font-weight:700;border:1px solid rgba(0,0,0,0.06)}
+    .pill.no-color{background:rgba(255,255,255,0.03);color:#e6eef8}
     .tabs{display:flex;gap:8px;margin-bottom:12px}
     .tab{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
-    .tab.active{background:linear-gradient(90deg,#0f1724,#0b1220);border-color:rgba(255,255,255,0.06)}
+    .tab.active{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06)}
     .section-title{font-weight:700;margin-bottom:8px}
     .field{font-size:14px;color:#cfe6ff;margin-bottom:6px}
-    textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    input[type="text"]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    textarea{min-height:100px}
     .small{font-size:13px;color:var(--muted)}
     footer{margin-top:18px;color:var(--muted);text-align:center}
+    /* responsive */
+    @media (max-width:900px){
+      .layout{grid-template-columns:1fr; padding-bottom:40px}
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
+  <div class="container">
+    <div class="top">
       <div class="brand">
         <div class="logo">A</div>
         <div>
           <div class="title">Archnem Panel</div>
-          <div class="sub">Account & server information</div>
+          <div class="subtitle">Account & server information</div>
         </div>
       </div>
-
-      <div class="controls">
+      <div class="actions">
+        <button id="refreshBtn" class="btn">Refresh</button>
         <button id="logout" class="btn">Logout</button>
       </div>
     </div>
 
-    <div class="grid">
-      <!-- left column: Informations -->
-      <div class="card" id="leftCard">
-        <div id="accountBlock">
-          <div style="display:flex;gap:12px;align-items:center">
+    <div class="layout">
+      <!-- left column -->
+      <div class="card">
+        <div id="account" class="account">
+          <div class="info">
             <img id="avatar" class="avatar" src="" alt="avatar">
             <div>
               <div id="displayName" style="font-weight:700;font-size:16px">—</div>
@@ -67,12 +72,12 @@
             </div>
           </div>
 
-          <div style="margin-top:12px">
+          <div style="margin-top:14px">
             <div class="section-title">Informations</div>
             <div class="field"><strong>ID:</strong> <span id="userId" class="small">—</span></div>
             <div class="field"><strong>Account:</strong> <span id="accountEmail" class="small">—</span></div>
             <div class="field"><strong>Highest role:</strong> <span id="highestRole" class="small">—</span></div>
-            <div style="margin-top:8px" class="muted">Nickname color is taken from your highest role.</div>
+            <div class="small" style="margin-top:6px">Nickname color is taken from your highest role.</div>
           </div>
 
           <div style="margin-top:14px">
@@ -82,18 +87,18 @@
         </div>
       </div>
 
-      <!-- right column: tabs -->
-      <div class="card" id="rightCard">
+      <!-- right column -->
+      <div class="card">
         <div class="tabs" role="tablist">
           <button class="tab active" data-tab="overview">Overview</button>
           <button class="tab" data-tab="bot">Bot</button>
+          <button class="tab" data-tab="channels">Channels</button>
         </div>
 
         <div id="tabContent">
-          <!-- Overview -->
           <div id="overview" class="tabPanel">
             <div class="section-title">Account summary</div>
-            <div class="muted">Quick actions and account details</div>
+            <div class="small">Quick actions and account details</div>
             <div style="margin-top:12px">
               <div class="small"><strong>Username</strong></div>
               <div id="usernameLine" class="field">—</div>
@@ -104,16 +109,23 @@
             </div>
           </div>
 
-          <!-- Bot tab -->
           <div id="bot" class="tabPanel" style="display:none">
             <div class="section-title">Bot Console</div>
-            <div class="muted">Actions are executed by the server bot token. You must be authorized to use these features.</div>
+            <div class="small">Actions are executed by the server bot token. You must be authorized to use these features.</div>
 
             <div style="margin-top:12px">
-              <div class="small"><strong>Send message to channel</strong></div>
-              <input id="channelId" type="text" placeholder="Channel ID" />
+              <div class="small"><strong>Channel</strong></div>
+              <select id="channelSelect"></select>
+
+              <div style="margin-top:8px" class="small"><strong>Message</strong></div>
               <textarea id="messageContent" placeholder="Message content"></textarea>
-              <button id="sendMsg" class="btn">Send as Bot</button>
+
+              <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+                <label><input type="checkbox" id="allowEveryone"> Allow @everyone</label>
+                <input id="mentionUsersInput" type="text" placeholder="User IDs to mention (comma separated)" style="flex:1" />
+              </div>
+
+              <button id="sendMsg" class="btn primary" style="margin-top:10px">Send as Bot</button>
               <div id="sendResult" class="small" style="margin-top:8px"></div>
             </div>
 
@@ -126,11 +138,12 @@
               </div>
               <div id="memberResult" class="small" style="margin-top:8px"></div>
             </div>
+          </div>
 
-            <div style="margin-top:16px">
-              <div class="small"><strong>Channel / Role management</strong></div>
-              <div style="margin-top:8px" class="small">Create/delete channels, create roles, change colors — available only if server authorizes you.</div>
-            </div>
+          <div id="channels" class="tabPanel" style="display:none">
+            <div class="section-title">Channels</div>
+            <div class="small">Select a category to view channels</div>
+            <div id="categoriesWrap" style="margin-top:12px"></div>
           </div>
         </div>
       </div>
@@ -151,19 +164,26 @@
       });
     });
 
-    // Remove token from URL if present
-    (function removeTokenFromUrl(){
+    // safe fetch helper
+    async function safeFetchJson(url, opts) {
+      const res = await fetch(url, opts);
+      const text = await res.text();
       try {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has("token") || url.searchParams.has("access_token")) {
-          url.searchParams.delete("token");
-          url.searchParams.delete("access_token");
-          window.history.replaceState({}, document.title, url.pathname + url.search);
+        const data = text ? JSON.parse(text) : {};
+        if (!res.ok) {
+          const errMsg = data && data.error ? data.error : `HTTP ${res.status}`;
+          throw new Error(errMsg);
         }
-      } catch(e){}
-    })();
+        return data;
+      } catch (e) {
+        if (!res.ok) {
+          const snippet = text ? text.slice(0,300) : '';
+          throw new Error(`Server error ${res.status}: ${snippet}`);
+        }
+        return { raw: text };
+      }
+    }
 
-    // Contrast helper
     function contrastColor(hex) {
       if (!hex) return "#ffffff";
       const h = hex.replace("#","");
@@ -174,49 +194,33 @@
       return luminance > 0.6 ? "#071022" : "#ffffff";
     }
 
-    // Load user and roles
+    // load user and roles
     async function loadUser() {
       try {
-        const r = await fetch('/api/user', { credentials: 'same-origin' });
-        if (!r.ok) {
-          const body = await r.json().catch(()=>({}));
-          throw new Error(body.error || 'Server error');
-        }
-        const data = await r.json();
-
-        // Basic info
+        const data = await safeFetchJson('/api/user', { credentials: 'same-origin' });
         document.getElementById('displayName').textContent = `${data.username}#${data.discriminator}`;
         document.getElementById('userId').textContent = data.id;
         document.getElementById('usernameLine').textContent = `${data.username}#${data.discriminator}`;
         document.getElementById('accountEmail').textContent = data.email || '—';
 
-        // Avatar
         const avatarEl = document.getElementById('avatar');
         if (data.avatar) avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
         else avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
 
-        // Roles: already sorted highest -> lowest by server
         const rolesEl = document.getElementById('roles');
         const roleList = document.getElementById('roleList');
         rolesEl.innerHTML = '';
         roleList.innerHTML = '';
 
         const roles = Array.isArray(data.roles) ? data.roles : [];
-
-        // Highest role color for nickname color
         const highest = roles.length ? roles[0] : null;
         document.getElementById('highestRole').textContent = highest ? highest.name : '—';
-        if (highest && highest.color) {
-          document.getElementById('displayName').style.color = highest.color;
-        } else {
-          document.getElementById('displayName').style.color = '';
-        }
+        if (highest && highest.color) document.getElementById('displayName').style.color = highest.color;
 
-        // Render pills
         roles.forEach(r=>{
           const pill = document.createElement('div');
-          pill.className = 'role-pill';
-          if (!r.color) pill.classList.add('role-no-color');
+          pill.className = 'pill';
+          if (!r.color) pill.classList.add('no-color');
           pill.textContent = r.name || r.id;
           if (r.color) {
             pill.style.background = r.color;
@@ -224,85 +228,154 @@
             pill.style.border = '1px solid rgba(0,0,0,0.08)';
           }
           rolesEl.appendChild(pill);
-
-          // also in overview list
-          const pill2 = pill.cloneNode(true);
-          roleList.appendChild(pill2);
+          roleList.appendChild(pill.cloneNode(true));
         });
-
       } catch (err) {
         console.error(err);
-        document.getElementById('status').textContent = 'Not signed in. Please log in via Discord.';
-        const eb = document.getElementById('errorBox');
-        eb.style.display = 'block';
-        eb.textContent = err.message || 'Network error';
+        document.getElementById('displayName').textContent = 'Not signed in';
       }
     }
 
-    // Logout
-    document.getElementById('logout').addEventListener('click', ()=>{
-      try { sessionStorage.removeItem('archnem_token'); } catch(e){}
-      window.location.href = '/api/logout';
-    });
+    // channels list
+    async function loadChannels() {
+      try {
+        const data = await safeFetchJson('/api/bot/listChannels', { credentials: 'same-origin' });
+        const wrap = document.getElementById('categoriesWrap');
+        const sel = document.getElementById('channelSelect');
+        wrap.innerHTML = ''; sel.innerHTML = '';
 
-    // Bot actions
+        (data.categories || []).forEach(cat=>{
+          const box = document.createElement('div');
+          box.style.marginBottom = '12px';
+          const title = document.createElement('div');
+          title.textContent = cat.name || 'Category';
+          title.style.fontWeight = '700';
+          title.style.marginBottom = '6px';
+          box.appendChild(title);
+          cat.channels.forEach(ch=>{
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.justifyContent = 'space-between';
+            row.style.padding = '6px 8px';
+            row.style.borderRadius = '8px';
+            row.style.background = 'rgba(255,255,255,0.01)';
+            row.style.marginBottom = '6px';
+            row.style.alignItems = 'center';
+            const name = document.createElement('div');
+            name.textContent = '# ' + ch.name;
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.textContent = 'Select';
+            btn.onclick = ()=> { document.getElementById('channelSelect').value = ch.id; };
+            row.appendChild(name);
+            row.appendChild(btn);
+            box.appendChild(row);
+
+            const opt = document.createElement('option');
+            opt.value = ch.id; opt.textContent = '# ' + ch.name;
+            sel.appendChild(opt);
+          });
+          wrap.appendChild(box);
+        });
+
+        if ((data.uncategorized || []).length) {
+          const box = document.createElement('div');
+          box.style.marginTop = '8px';
+          const title = document.createElement('div');
+          title.textContent = 'Uncategorized';
+          title.style.fontWeight = '700';
+          title.style.marginBottom = '6px';
+          box.appendChild(title);
+          data.uncategorized.forEach(ch=>{
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.justifyContent = 'space-between';
+            row.style.padding = '6px 8px';
+            row.style.borderRadius = '8px';
+            row.style.background = 'rgba(255,255,255,0.01)';
+            row.style.marginBottom = '6px';
+            row.style.alignItems = 'center';
+            const name = document.createElement('div');
+            name.textContent = '# ' + ch.name;
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.textContent = 'Select';
+            btn.onclick = ()=> { document.getElementById('channelSelect').value = ch.id; };
+            row.appendChild(name);
+            row.appendChild(btn);
+            box.appendChild(row);
+
+            const opt = document.createElement('option');
+            opt.value = ch.id; opt.textContent = '# ' + ch.name;
+            sel.appendChild(opt);
+          });
+          wrap.appendChild(box);
+        }
+      } catch (err) {
+        console.error('loadChannels error', err);
+      }
+    }
+
+    // send message
     document.getElementById('sendMsg').addEventListener('click', async ()=>{
-      const channelId = document.getElementById('channelId').value.trim();
+      const channelId = document.getElementById('channelSelect').value;
       const content = document.getElementById('messageContent').value.trim();
+      const allowEveryone = document.getElementById('allowEveryone').checked;
+      const mentionUsersRaw = document.getElementById('mentionUsersInput').value.trim();
+      const mentionUsers = mentionUsersRaw ? mentionUsersRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
       const out = document.getElementById('sendResult');
       out.textContent = 'Sending...';
       try {
-        const r = await fetch('/api/bot/sendMessage', {
+        const res = await safeFetchJson('/api/bot/sendMessage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ channelId, content })
+          body: JSON.stringify({ channelId, content, allowEveryone, mentionUsers })
         });
-        const body = await r.json();
-        if (!r.ok) throw new Error(body.error || 'Failed');
         out.textContent = 'Message sent';
       } catch (err) {
         out.textContent = 'Error: ' + (err.message || err);
       }
     });
 
+    // ban/kick
     document.getElementById('banBtn').addEventListener('click', async ()=>{
       const userId = document.getElementById('targetUser').value.trim();
       const out = document.getElementById('memberResult');
       out.textContent = 'Processing...';
       try {
-        const r = await fetch('/api/bot/ban', {
+        await safeFetchJson('/api/bot/ban', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId })
         });
-        const body = await r.json();
-        if (!r.ok) throw new Error(body.error || 'Failed');
         out.textContent = 'User banned';
       } catch (err) {
         out.textContent = 'Error: ' + (err.message || err);
       }
     });
-
     document.getElementById('kickBtn').addEventListener('click', async ()=>{
       const userId = document.getElementById('targetUser').value.trim();
       const out = document.getElementById('memberResult');
       out.textContent = 'Processing...';
       try {
-        const r = await fetch('/api/bot/kick', {
+        await safeFetchJson('/api/bot/kick', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId })
         });
-        const body = await r.json();
-        if (!r.ok) throw new Error(body.error || 'Failed');
         out.textContent = 'User kicked';
       } catch (err) {
         out.textContent = 'Error: ' + (err.message || err);
       }
     });
 
+    // refresh and init
+    document.getElementById('refreshBtn').addEventListener('click', ()=>{ loadUser(); loadChannels(); });
+    document.getElementById('logout').addEventListener('click', ()=>{ window.location.href = '/api/logout'; });
+
     // init
     loadUser();
+    loadChannels();
   </script>
 </body>
 </html>
