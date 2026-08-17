@@ -10,7 +10,8 @@
     .btn{background:rgba(255,255,255,0.06);border:0;padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
     .avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #d28cff}
     .roles{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .role{background:#fff;padding:6px 10px;border-radius:999px;color:#071022;font-weight:700}
+    .role{padding:6px 10px;border-radius:999px;color:#071022;font-weight:700;border:1px solid rgba(0,0,0,0.08)}
+    .role.no-color{background:rgba(255,255,255,0.06);color:#eaeaea}
     .muted{color:#9aa6b2}
   </style>
 </head>
@@ -73,15 +74,30 @@
 
         const rolesEl = document.getElementById("roles");
         rolesEl.innerHTML = "";
-        const roleIds = Array.isArray(data.roles) ? data.roles : [];
-        if (!roleIds.length) {
+        const roleObjs = Array.isArray(data.roles) ? data.roles : [];
+        if (!roleObjs.length) {
           rolesEl.innerHTML = `<div class="muted">Brak ról</div>`;
           return;
         }
-        roleIds.forEach(rid => {
+
+        // render each role with color and name
+        roleObjs.forEach(r => {
           const el = document.createElement("div");
           el.className = "role";
-          el.textContent = rid;
+          if (!r.color) el.classList.add("no-color");
+          el.textContent = r.name || r.id;
+          // apply background color if available; ensure readable text color
+          if (r.color) {
+            // r.color is like "#aabbcc"
+            el.style.background = r.color;
+            // choose text color based on luminance
+            const hex = r.color.replace("#","");
+            const rVal = parseInt(hex.substring(0,2),16);
+            const gVal = parseInt(hex.substring(2,4),16);
+            const bVal = parseInt(hex.substring(4,6),16);
+            const luminance = (0.299*rVal + 0.587*gVal + 0.114*bVal)/255;
+            el.style.color = luminance > 0.6 ? "#071022" : "#ffffff";
+          }
           rolesEl.appendChild(el);
         });
       } catch (err) {
@@ -94,12 +110,10 @@
     }
 
     document.getElementById("logout").addEventListener("click", () => {
-      // clear any client-side storage and call server logout
       try { sessionStorage.removeItem("archnem_token"); } catch(e){}
       window.location.href = "/api/logout";
     });
 
-    // auto load
     loadUser();
   </script>
 </body>
