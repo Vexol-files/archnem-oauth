@@ -7,13 +7,11 @@ export default async function handler(req, res) {
 
     if (!access_token) return res.status(401).json({ error: "Missing session. Please log in." });
 
-    // SECURITY: reject if someone accidentally provided BOT_TOKEN as access_token
     if (process.env.BOT_TOKEN && access_token === process.env.BOT_TOKEN) {
       console.error("Security: received BOT_TOKEN as access_token");
       return res.status(400).json({ error: "Invalid token" });
     }
 
-    // fetch user
     const userResp = await fetch("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${access_token}` }
     });
@@ -26,15 +24,12 @@ export default async function handler(req, res) {
 
     const userData = await userResp.json();
 
-    // server-side checks
     if (!process.env.GUILD_ID || !process.env.BOT_TOKEN) {
       console.error("Server misconfiguration: missing GUILD_ID or BOT_TOKEN");
       return res.status(500).json({ error: "Server misconfiguration" });
     }
 
-    // fetch guild member using BOT_TOKEN (server-side only)
-    const guildUrl = `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`;
-    const guildResp = await fetch(guildUrl, {
+    const guildResp = await fetch(`https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`, {
       headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` }
     });
 
