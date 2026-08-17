@@ -129,7 +129,7 @@
   <div class="logo">Archnem Panel</div>
 
   <div class="nav-item active" data-tab="info">Informations</div>
-  <div class="nav-item" data-tab="bot">Bot Console</div>
+  <div class="nav-item" id="botTab" data-tab="bot" style="display:none;">Bot Console</div>
 
   <button id="logout" class="btn" style="margin-top:auto;">Logout</button>
 </div>
@@ -178,6 +178,21 @@
         <select id="channelSelect"></select>
       </div>
 
+      <div style="margin-top:20px; display:flex; gap:10px;">
+        <label><input type="checkbox" id="mentionEveryone"> @everyone</label>
+        <label><input type="checkbox" id="mentionHere"> @here</label>
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong>Mention user ID</strong>
+        <input id="mentionUserId" placeholder="optional">
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong>Mention role ID</strong>
+        <input id="mentionRoleId" placeholder="optional">
+      </div>
+
       <div style="margin-top:20px;">
         <strong>Message</strong>
         <textarea id="messageContent"></textarea>
@@ -209,13 +224,9 @@ const BADGE_ICONS = {
 async function safeFetchJson(url, opts) {
   const res = await fetch(url, opts);
   const text = await res.text();
-  try {
-    const data = text ? JSON.parse(text) : {};
-    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-    return data;
-  } catch {
-    throw new Error(`Server error: ${text.slice(0,200)}`);
-  }
+  const data = text ? JSON.parse(text) : {};
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
 }
 
 async function loadUser() {
@@ -239,8 +250,9 @@ async function loadUser() {
   document.getElementById('smallUser').textContent =
     `${data.username}#${data.discriminator}`;
 
-  if (data.id === "YOUR_OWNER_ID") {
+  if (data.isOwnerRole) {
     document.getElementById('ownerIcon').style.display = "block";
+    document.getElementById('botTab').style.display = "block";
   }
 
   const badgesEl = document.getElementById('badges');
@@ -301,6 +313,38 @@ document.querySelectorAll('.nav-item').forEach(btn => {
 
 document.getElementById('logout').addEventListener('click', () => {
   window.location.href = '/api/logout';
+});
+
+document.getElementById('sendMsg').addEventListener('click', async () => {
+  try {
+    const channelId = document.getElementById('channelSelect').value;
+    const content = document.getElementById('messageContent').value;
+    const mentionEveryone = document.getElementById('mentionEveryone').checked;
+    const mentionHere = document.getElementById('mentionHere').checked;
+    const mentionUserId = document.getElementById('mentionUserId').value || null;
+    const mentionRoleId = document.getElementById('mentionRoleId').value || null;
+
+    const body = {
+      channelId,
+      content,
+      mentionEveryone,
+      mentionHere,
+      mentionUserId,
+      mentionRoleId
+    };
+
+    const res = await safeFetchJson('/api/bot/sendMessage', {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      credentials:"same-origin",
+      body:JSON.stringify(body)
+    });
+
+    document.getElementById('sendResult').textContent =
+      `Sent message ID: ${res.messageId}`;
+  } catch (err) {
+    document.getElementById('sendResult').textContent = `Error: ${err.message}`;
+  }
 });
 
 loadUser();
