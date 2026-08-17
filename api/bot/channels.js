@@ -1,3 +1,4 @@
+// /api/bot/channels.js
 export default async function handler(req, res) {
   try {
     const resp = await fetch(
@@ -7,18 +8,20 @@ export default async function handler(req, res) {
 
     const channels = await resp.json();
 
-    const mapped = channels.map(ch => ({
+    const filtered = channels
+      .filter(ch => ch.type !== 4) // bez kategorii
+      .filter(ch => ch.name !== "modchannels"); // wywal konkretną kategorię po nazwie
+
+    const mapped = filtered.map(ch => ({
       id: ch.id,
       name: ch.name,
       type: ch.type,
       typeName:
         ch.type === 0 ? "Text" :
         ch.type === 2 ? "Voice" :
-        ch.type === 4 ? "Category" :
         ch.type === 5 ? "Announcement" :
         ch.type === 15 ? "Forum" :
         ch.type === 12 ? "Stage" :
-        ch.type === 13 ? "Directory" :
         ch.type === 14 ? "Thread" :
         "Other"
     }));
