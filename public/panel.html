@@ -389,3 +389,329 @@
   </div>
 
 </div>
+<script>
+/* ============================
+   BADGE ICONS
+============================ */
+const BADGE_ICONS = {
+  HypeSquadBravery: "https://cdn.discordapp.com/badge-icons/1.png",
+  HypeSquadBrilliance: "https://cdn.discordapp.com/badge-icons/2.png",
+  HypeSquadBalance: "https://cdn.discordapp.com/badge-icons/3.png",
+  BugHunterLevel1: "https://cdn.discordapp.com/badge-icons/bug1.png",
+  BugHunterLevel2: "https://cdn.discordapp.com/badge-icons/bug2.png",
+  EarlySupporter: "https://cdn.discordapp.com/badge-icons/es.png",
+  VerifiedDeveloper: "https://cdn.discordapp.com/badge-icons/vd.png",
+  ActiveDeveloper: "https://cdn.discordapp.com/badge-icons/ad.png",
+  Nitro: "https://cdn.discordapp.com/badge-icons/nitro.png",
+  Staff: "https://cdn.discordapp.com/badge-icons/staff.png",
+  Partner: "https://cdn.discordapp.com/badge-icons/partner.png"
+};
+
+/* ============================
+   SAFE JSON FETCH
+============================ */
+async function safeFetchJson(url, opts) {
+  const res = await fetch(url, opts);
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : {};
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+/* ============================
+   LOAD USER INFO
+============================ */
+async function loadUser() {
+  const data = await safeFetchJson('/api/user', { credentials:'same-origin' });
+
+  const avatarUrl = data.avatar 
+    ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  document.getElementById('avatarImg').src = avatarUrl;
+
+  if (data.avatarDecorationUrl) {
+    const deco = document.getElementById('avatarDeco');
+    deco.src = data.avatarDecorationUrl;
+    deco.style.display = "block";
+  }
+
+  const highest = data.roles.length ? data.roles[0] : null;
+  const bigNick = document.getElementById('bigNick');
+  bigNick.textContent = data.username;
+
+  if (highest && highest.color) {
+    bigNick.style.color = highest.color;
+    bigNick.style.textShadow = `0 0 15px ${highest.color}55`;
+  }
+
+  document.getElementById('smallUser').textContent =
+    `${data.username}#${data.discriminator}`;
+
+  /* OWNER ROLE CHECK */
+  if (data.isOwnerRole) {
+    document.getElementById('ownerIcon').style.display = "block";
+    document.getElementById('botTab').style.display = "block";
+    document.getElementById('adminTab').style.display = "block";
+  }
+
+  /* BADGES */
+  const badgesEl = document.getElementById('badges');
+  badgesEl.innerHTML = "";
+  if (data.badges) {
+    data.badges.forEach(b => {
+      if (BADGE_ICONS[b]) {
+        const img = document.createElement('img');
+        img.src = BADGE_ICONS[b];
+        img.className = "badge";
+        badgesEl.appendChild(img);
+      }
+    });
+  }
+
+  /* ROLES */
+  const rolesEl = document.getElementById('roles');
+  rolesEl.innerHTML = '';
+  data.roles.forEach(r => {
+    const pill = document.createElement('div');
+    pill.className = 'pill';
+    pill.textContent = r.name;
+    if (r.color) {
+      pill.style.background = r.color;
+      pill.style.color = "#000";
+    }
+    rolesEl.appendChild(pill);
+  });
+
+  document.getElementById('userId').textContent = data.id;
+  document.getElementById('accountEmail').textContent = data.email || '—';
+  document.getElementById('highestRole').textContent = highest ? highest.name : '—';
+}
+
+/* ============================
+   LOAD CHANNELS
+============================ */
+async function loadChannels() {
+  const data = await safeFetchJson('/api/bot/channels', { credentials:'same-origin' });
+
+  const select = document.getElementById('channelSelect');
+  select.innerHTML = '';
+
+  data.channels.forEach(ch => {
+    const opt = document.createElement('option');
+    opt.value = ch.id;
+    opt.textContent = `${ch.typeName} — #${ch.name}`;
+    select.appendChild(opt);
+  });
+}
+
+/* ============================
+   LOAD STATUS
+============================ */
+async function loadStatus() {
+  try {
+    const data = await safeFetchJson('/api/status', { credentials:'same-origin' });
+    const s = data.statuses;
+
+    const free = s["1532746207040897155"];
+    const premium = s["1534247246856458404"];
+    const beta = s["1536372284644655165"];
+
+    if (free) {
+      document.getElementById('freeDot').style.background = free.color;
+      document.getElementById('freeText').textContent =
+        `${free.rawName} — ${free.state}`;
+    }
+
+    if (premium) {
+      document.getElementById('premiumDot').style.background = premium.color;
+      document.getElementById('premiumText').textContent =
+        `${premium.rawName} — ${premium.state}`;
+    }
+
+    if (beta) {
+      document.getElementById('betaDot').style.background = beta.color;
+      document.getElementById('betaText').textContent =
+        `${beta.rawName} — ${beta.state}`;
+    }
+
+  } catch (err) {
+    document.getElementById('freeText').textContent = "Error loading status";
+    document.getElementById('premiumText').textContent = "Error loading status";
+    document.getElementById('betaText').textContent = "Error loading status";
+  }
+}
+
+/* ============================
+   TAB SWITCHING
+============================ */
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tabPanel').forEach(p => p.style.display='none');
+    document.getElementById(tab).style.display='block';
+  });
+});
+
+/* ============================
+   LOGOUT
+============================ */
+document.getElementById('logout').addEventListener('click', () => {
+  window.location.href = '/api/logout';
+});
+
+/* ============================
+   BOT CONSOLE — SEND MESSAGE
+============================ */
+document.getElementById('sendMsg').addEventListener('click', async () => {
+  try {
+    const channelId = document.getElementById('channelSelect').value;
+    const content = document.getElementById('messageContent').value;
+
+    /* mentions */
+    const mentionEveryone = document.getElementById('mentionEveryone').checked;
+    const mentionHere = document.getElementById('mentionHere').checked;
+
+    /* role search */
+    const roleName = document.getElementById('mentionRoleName').value.trim();
+    let mentionRoleId = null;
+    if (roleName.length > 0) {
+      const roleData = await safeFetchJson(`/api/admin/roles?search=${encodeURIComponent(roleName)}`, {
+        credentials:"same-origin"
+      });
+      if (roleData.match) mentionRoleId = roleData.match.id;
+    }
+
+    /* user search */
+    const userName = document.getElementById('mentionUserName').value.trim();
+    let mentionUserId = null;
+    if (userName.length > 0) {
+      const userData = await safeFetchJson(`/api/admin/members?search=${encodeURIComponent(userName)}`, {
+        credentials:"same-origin"
+      });
+      if (userData.match) mentionUserId = userData.match.id;
+    }
+
+    const body = {
+      channelId,
+      content,
+      mentionEveryone,
+      mentionHere,
+      mentionUserId,
+      mentionRoleId
+    };
+
+    const res = await safeFetchJson('/api/bot/sendMessage', {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      credentials:"same-origin",
+      body:JSON.stringify(body)
+    });
+
+    document.getElementById('sendResult').textContent =
+      `Sent message ID: ${res.messageId}`;
+  } catch (err) {
+    document.getElementById('sendResult').textContent = `Error: ${err.message}`;
+  }
+});
+
+/* ============================
+   ADMIN TOOLS — SEARCH USERS
+============================ */
+document.getElementById('adminUserSearch').addEventListener('input', async (e) => {
+  const q = e.target.value.trim();
+  const box = document.getElementById('adminUserResults');
+  box.innerHTML = "";
+
+  if (q.length < 1) return;
+
+  const data = await safeFetchJson(`/api/admin/members?search=${encodeURIComponent(q)}`, {
+    credentials:"same-origin"
+  });
+
+  data.results.forEach(u => {
+    const div = document.createElement('div');
+    div.textContent = `${u.username}#${u.discriminator}`;
+    div.style.cursor = "pointer";
+    div.style.padding = "4px 0";
+    div.onclick = () => {
+      document.getElementById('adminSelectedUser').textContent =
+        `${u.username}#${u.discriminator} (${u.id})`;
+      window._adminSelectedUser = u.id;
+    };
+    box.appendChild(div);
+  });
+});
+
+/* ============================
+   ADMIN TOOLS — SEARCH ROLES
+============================ */
+document.getElementById('adminRoleSearch').addEventListener('input', async (e) => {
+  const q = e.target.value.trim();
+  const box = document.getElementById('adminRoleResults');
+  box.innerHTML = "";
+
+  if (q.length < 1) return;
+
+  const data = await safeFetchJson(`/api/admin/roles?search=${encodeURIComponent(q)}`, {
+    credentials:"same-origin"
+  });
+
+  data.results.forEach(r => {
+    const div = document.createElement('div');
+    div.textContent = `${r.name} (${r.id})`;
+    div.style.cursor = "pointer";
+    div.style.padding = "4px 0";
+    div.onclick = () => {
+      document.getElementById('adminSelectedRole').textContent =
+        `${r.name} (${r.id})`;
+      window._adminSelectedRole = r.id;
+    };
+    box.appendChild(div);
+  });
+});
+
+/* ============================
+   ADMIN ACTIONS
+============================ */
+async function adminAction(type) {
+  const userId = window._adminSelectedUser;
+  const roleId = window._adminSelectedRole;
+
+  if (!userId) {
+    document.getElementById('adminLog').innerHTML += "<div>No user selected</div>";
+    return;
+  }
+
+  const body = { type, userId, roleId };
+
+  const res = await safeFetchJson('/api/admin/actions', {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    credentials:"same-origin",
+    body:JSON.stringify(body)
+  });
+
+  document.getElementById('adminLog').innerHTML +=
+    `<div>${res.message}</div>`;
+}
+
+document.getElementById('adminGiveRole').addEventListener('click', () => adminAction("giveRole"));
+document.getElementById('adminRemoveRole').addEventListener('click', () => adminAction("removeRole"));
+document.getElementById('adminKick').addEventListener('click', () => adminAction("kick"));
+document.getElementById('adminBan').addEventListener('click', () => adminAction("ban"));
+document.getElementById('adminDM').addEventListener('click', () => adminAction("dm"));
+
+/* ============================
+   INIT
+============================ */
+loadUser();
+loadChannels();
+loadStatus();
+</script>
+
+</body>
+</html>
