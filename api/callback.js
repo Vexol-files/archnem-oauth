@@ -1,5 +1,4 @@
 // /api/callback.js
-// Wymiana code -> access_token i redirect do panel.html?access_token=...
 export default async function handler(req, res) {
   try {
     const code = req.query.code;
@@ -22,12 +21,26 @@ export default async function handler(req, res) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenData || !tokenData.access_token) {
-      // jeśli brak tokena, przekieruj z informacją o błędzie
+      console.error("callback: token exchange failed", tokenData);
       return res.redirect("/panel.html?error=token_failed");
     }
 
-    // Przekierowanie z tokenem w URL (flow bez cookie)
-    return res.redirect(`/panel.html?access_token=${encodeURIComponent(tokenData.access_token)}`);
+    // SECURITY: jeśli token zwrócony przez Discord równa się BOT_TOKEN -> log i abort
+    if (process.env.BOT_TOKEN && tokenData.access_token === process.env.BOT_TOKEN) {
+      console.error("Security: received token equals BOT_TOKEN — aborting redirect");
+      return res.redirect("/panel.html?error=server_security");
+    }
+
+    // Najpierw usuń ewentualne stare cookie (bezpieczne)
+    res.setHeader("Set-Cookie", [
+      // usuń stare cookie
+      `archnem_token=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0`,
+      // ustaw nowe cookie HttpOnly (access token), krótszy czas życia jeśli chcesz
+      `archnem_token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${60 * 60}`
+    ]);
+
+    // Redirect bez tokena w URL
+    return res.redirect("/panel.html");
   } catch (err) {
     console.error("callback.js error:", err);
     return res.redirect("/panel.html?error=server_error");
