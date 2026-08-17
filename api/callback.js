@@ -34,9 +34,9 @@ export default async function handler(req, res) {
     // Najpierw usuń ewentualne stare cookie (bezpieczne)
     res.setHeader("Set-Cookie", [
       // usuń stare cookie
-      `archnem_token=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0`,
+      `archnem_token1=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0`,
       // ustaw nowe cookie HttpOnly (access token), krótszy czas życia jeśli chcesz
-      `archnem_token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${60 * 60}`
+      `archnem_token1=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${60 * 60}`
     ]);
 
     // Redirect bez tokena w URL
