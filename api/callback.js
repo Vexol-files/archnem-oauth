@@ -1,4 +1,5 @@
 // /api/callback.js
+// Wymiana code -> access_token i redirect do panel.html?access_token=...
 export default async function handler(req, res) {
   try {
     const code = req.query.code;
@@ -21,10 +22,11 @@ export default async function handler(req, res) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenData || !tokenData.access_token) {
+      // jeśli brak tokena, przekieruj z informacją o błędzie
       return res.redirect("/panel.html?error=token_failed");
     }
 
-    // Redirect z tokenem w URL (użytkownik poprosił o flow bez cookie)
+    // Przekierowanie z tokenem w URL (flow bez cookie)
     return res.redirect(`/panel.html?access_token=${encodeURIComponent(tokenData.access_token)}`);
   } catch (err) {
     console.error("callback.js error:", err);
