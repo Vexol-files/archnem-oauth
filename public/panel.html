@@ -389,7 +389,8 @@
   </div>
 
 </div>
-<script>
+
+  <script>
 /* ============================
    BADGE ICONS
 ============================ */
@@ -564,14 +565,14 @@ document.getElementById('logout').addEventListener('click', () => {
 });
 
 /* ============================
-   BOT CONSOLE — SEND MESSAGE
+   BOT CONSOLE — SEND MESSAGE (MENTIONS FIX)
 ============================ */
 document.getElementById('sendMsg').addEventListener('click', async () => {
   try {
     const channelId = document.getElementById('channelSelect').value;
-    const content = document.getElementById('messageContent').value;
+    let content = document.getElementById('messageContent').value;
 
-    /* mentions */
+    /* checkbox mentions */
     const mentionEveryone = document.getElementById('mentionEveryone').checked;
     const mentionHere = document.getElementById('mentionHere').checked;
 
@@ -595,13 +596,18 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
       if (userData.match) mentionUserId = userData.match.id;
     }
 
+    /* build prefix with mentions */
+    let prefix = "";
+    if (mentionEveryone) prefix += "@everyone ";
+    if (mentionHere) prefix += "@here ";
+    if (mentionRoleId) prefix += `<@&${mentionRoleId}> `;
+    if (mentionUserId) prefix += `<@${mentionUserId}> `;
+
+    content = prefix + content;
+
     const body = {
       channelId,
-      content,
-      mentionEveryone,
-      mentionHere,
-      mentionUserId,
-      mentionRoleId
+      content
     };
 
     const res = await safeFetchJson('/api/bot/sendMessage', {
