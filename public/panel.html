@@ -16,7 +16,6 @@
     height:100vh;
     overflow:hidden;
   }
-
   .sidebar {
     width:230px;
     background:#050509;
@@ -26,7 +25,6 @@
     flex-direction:column;
     gap:20px;
   }
-
   .logo {
     font-size:22px;
     font-weight:800;
@@ -34,7 +32,6 @@
     -webkit-background-clip:text;
     color:transparent;
   }
-
   .nav-item {
     padding:12px;
     border-radius:8px;
@@ -42,39 +39,28 @@
     color:#ccc;
     transition:0.2s;
   }
-
   .nav-item:hover {
     background:#111;
     color:#fff;
   }
-
   .nav-item.active {
     background:#1f2937;
     color:#fff;
     font-weight:600;
     box-shadow:0 0 12px rgba(59,130,246,0.4);
   }
-
   .main {
     flex:1;
     overflow-y:auto;
     padding:30px;
   }
-
   .card {
     background:#050509;
     padding:30px;
     border-radius:16px;
     box-shadow:0 0 40px rgba(59,130,246,0.35);
-    animation:fadeIn 0.6s ease;
     border:1px solid #1f2937;
   }
-
-  @keyframes fadeIn {
-    from { opacity:0; transform:translateY(10px); }
-    to { opacity:1; transform:translateY(0); }
-  }
-
   .pill {
     padding:6px 12px;
     border-radius:999px;
@@ -83,14 +69,12 @@
     background:#111;
     color:#fff;
   }
-
   .roles {
     display:flex;
     flex-wrap:wrap;
     gap:8px;
     margin-top:10px;
   }
-
   select, input, textarea {
     width:100%;
     padding:10px;
@@ -99,7 +83,6 @@
     border:1px solid #333;
     color:#fff;
   }
-
   .btn {
     padding:10px 14px;
     border-radius:8px;
@@ -109,29 +92,24 @@
     cursor:pointer;
     transition:0.2s;
   }
-
   .btn:hover {
     background:#1f2937;
   }
-
   .btn.primary {
     background:linear-gradient(90deg,#3b82f6,#a855f7);
     border:none;
     box-shadow:0 0 16px rgba(59,130,246,0.6);
   }
-
   .badge {
     width:32px;
     height:32px;
     filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
   }
-
   .avatar-wrapper {
     position:relative;
     width:110px;
     height:110px;
   }
-
   .avatar-base {
     width:110px;
     height:110px;
@@ -139,7 +117,6 @@
     object-fit:cover;
     box-shadow:0 0 20px rgba(59,130,246,0.6);
   }
-
   .avatar-decoration {
     position:absolute;
     inset:0;
@@ -147,36 +124,29 @@
     height:110px;
     pointer-events:none;
   }
-
   .status-dot {
     width:16px;
     height:16px;
     border-radius:50%;
     margin-right:8px;
   }
-
   .status-row {
     display:flex;
     align-items:center;
     gap:8px;
     margin-top:8px;
   }
-
   .two-column {
     display:flex;
     gap:20px;
     flex-wrap:wrap;
   }
-
   .two-column > .col {
     flex:1;
     min-width:260px;
   }
-
   @media (max-width:768px) {
-    body {
-      flex-direction:column;
-    }
+    body { flex-direction:column; }
     .sidebar {
       width:100%;
       flex-direction:row;
@@ -185,41 +155,23 @@
       border-right:none;
       border-bottom:1px solid #111;
     }
-    .main {
-      padding:16px;
-    }
-    .card {
-      padding:20px;
-    }
-    .avatar-wrapper {
-      width:80px;
-      height:80px;
-    }
-    .avatar-base,
-    .avatar-decoration {
-      width:80px;
-      height:80px;
-    }
-    #bigNick {
-      font-size:28px;
-    }
-    #smallUser {
-      font-size:14px;
-    }
+    .main { padding:16px; }
+    .card { padding:20px; }
+    .avatar-wrapper { width:80px; height:80px; }
+    .avatar-base,.avatar-decoration { width:80px; height:80px; }
+    #bigNick { font-size:28px; }
+    #smallUser { font-size:14px; }
   }
 </style>
 </head>
-
 <body>
 
 <div class="sidebar">
   <div class="logo">Archnemesis Panel</div>
-
   <div class="nav-item active" data-tab="info">Informations</div>
   <div class="nav-item" id="statusTab" data-tab="status">Status</div>
   <div class="nav-item" id="botTab" data-tab="bot" style="display:none;">Bot Console</div>
   <div class="nav-item" id="adminTab" data-tab="admin" style="display:none;">Admin Tools</div>
-
   <button id="logout" class="btn" style="margin-top:auto;">Logout</button>
 </div>
 
@@ -228,19 +180,15 @@
   <!-- INFO -->
   <div id="info" class="tabPanel">
     <div class="card">
-
       <div style="display:flex; align-items:center; gap:25px;">
         <div class="avatar-wrapper">
           <img id="avatarImg" class="avatar-base" src="">
           <img id="avatarDeco" class="avatar-decoration" src="" style="display:none;">
         </div>
-
         <div>
           <div id="bigNick" style="font-size:40px; font-weight:800; letter-spacing:-1px;">Loading...</div>
           <div id="smallUser" style="font-size:18px; opacity:0.8; margin-top:4px;">—</div>
-
           <div id="badges" style="display:flex; gap:8px; margin-top:10px;"></div>
-
           <img id="ownerIcon"
                src="https://tr.rbxcdn.com/180DAY-9d9e2b179cfa38edb50110f4c7d94e1b/420/420/BackAccessory/Webp/noFilter"
                style="width:32px; height:32px; display:none; margin-top:10px;">
@@ -255,7 +203,6 @@
 
       <div style="margin-top:20px; font-size:20px; font-weight:700;">Roles</div>
       <div id="roles" class="roles"></div>
-
     </div>
   </div>
 
@@ -266,21 +213,11 @@
 
       <div style="margin-top:16px; opacity:0.8;">
         Legend:
-        <div class="status-row">
-          <div class="status-dot" style="background:#22c55e;"></div> Working
-        </div>
-        <div class="status-row">
-          <div class="status-dot" style="background:#eab308;"></div> Use at your own risk
-        </div>
-        <div class="status-row">
-          <div class="status-dot" style="background:#a855f7;"></div> Bugged
-        </div>
-        <div class="status-row">
-          <div class="status-dot" style="background:#3b82f6;"></div> Updating
-        </div>
-        <div class="status-row">
-          <div class="status-dot" style="background:#ef4444;"></div> Down
-        </div>
+        <div class="status-row"><div class="status-dot" style="background:#22c55e;"></div> Working</div>
+        <div class="status-row"><div class="status-dot" style="background:#eab308;"></div> Use at your own risk</div>
+        <div class="status-row"><div class="status-dot" style="background:#a855f7;"></div> Bugged</div>
+        <div class="status-row"><div class="status-dot" style="background:#3b82f6;"></div> Updating</div>
+        <div class="status-row"><div class="status-dot" style="background:#ef4444;"></div> Down</div>
       </div>
 
       <div style="margin-top:24px;">
@@ -312,7 +249,6 @@
   <!-- BOT -->
   <div id="bot" class="tabPanel" style="display:none;">
     <div class="card">
-
       <div style="font-size:22px; font-weight:700;">Bot Console</div>
 
       <div class="two-column" style="margin-top:20px;">
@@ -339,12 +275,10 @@
         <div class="col">
           <strong>Message</strong>
           <textarea id="messageContent"></textarea>
-
           <button id="sendMsg" class="btn primary" style="margin-top:10px;">Send as Bot</button>
           <div id="sendResult" style="margin-top:10px; opacity:0.8;"></div>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -371,6 +305,9 @@
           <strong style="margin-top:10px; display:block;">Selected role</strong>
           <div id="adminSelectedRole">None</div>
 
+          <strong style="margin-top:20px; display:block;">DM message</strong>
+          <textarea id="adminDMMessage" placeholder="Type DM message here..."></textarea>
+
           <div style="margin-top:20px; display:flex; flex-wrap:wrap; gap:8px;">
             <button id="adminGiveRole" class="btn">Give role</button>
             <button id="adminRemoveRole" class="btn">Remove role</button>
@@ -389,11 +326,7 @@
   </div>
 
 </div>
-
-  <script>
-/* ============================
-   BADGE ICONS
-============================ */
+<script>
 const BADGE_ICONS = {
   HypeSquadBravery: "https://cdn.discordapp.com/badge-icons/1.png",
   HypeSquadBrilliance: "https://cdn.discordapp.com/badge-icons/2.png",
@@ -408,9 +341,6 @@ const BADGE_ICONS = {
   Partner: "https://cdn.discordapp.com/badge-icons/partner.png"
 };
 
-/* ============================
-   SAFE JSON FETCH
-============================ */
 async function safeFetchJson(url, opts) {
   const res = await fetch(url, opts);
   const text = await res.text();
@@ -419,9 +349,6 @@ async function safeFetchJson(url, opts) {
   return data;
 }
 
-/* ============================
-   LOAD USER INFO
-============================ */
 async function loadUser() {
   const data = await safeFetchJson('/api/user', { credentials:'same-origin' });
 
@@ -449,14 +376,12 @@ async function loadUser() {
   document.getElementById('smallUser').textContent =
     `${data.username}#${data.discriminator}`;
 
-  /* OWNER ROLE CHECK */
   if (data.isOwnerRole) {
     document.getElementById('ownerIcon').style.display = "block";
     document.getElementById('botTab').style.display = "block";
     document.getElementById('adminTab').style.display = "block";
   }
 
-  /* BADGES */
   const badgesEl = document.getElementById('badges');
   badgesEl.innerHTML = "";
   if (data.badges) {
@@ -470,7 +395,6 @@ async function loadUser() {
     });
   }
 
-  /* ROLES */
   const rolesEl = document.getElementById('roles');
   rolesEl.innerHTML = '';
   data.roles.forEach(r => {
@@ -489,15 +413,10 @@ async function loadUser() {
   document.getElementById('highestRole').textContent = highest ? highest.name : '—';
 }
 
-/* ============================
-   LOAD CHANNELS
-============================ */
 async function loadChannels() {
   const data = await safeFetchJson('/api/bot/channels', { credentials:'same-origin' });
-
   const select = document.getElementById('channelSelect');
   select.innerHTML = '';
-
   data.channels.forEach(ch => {
     const opt = document.createElement('option');
     opt.value = ch.id;
@@ -506,9 +425,6 @@ async function loadChannels() {
   });
 }
 
-/* ============================
-   LOAD STATUS
-============================ */
 async function loadStatus() {
   try {
     const data = await safeFetchJson('/api/status', { credentials:'same-origin' });
@@ -523,19 +439,16 @@ async function loadStatus() {
       document.getElementById('freeText').textContent =
         `${free.rawName} — ${free.state}`;
     }
-
     if (premium) {
       document.getElementById('premiumDot').style.background = premium.color;
       document.getElementById('premiumText').textContent =
         `${premium.rawName} — ${premium.state}`;
     }
-
     if (beta) {
       document.getElementById('betaDot').style.background = beta.color;
       document.getElementById('betaText').textContent =
         `${beta.rawName} — ${beta.state}`;
     }
-
   } catch (err) {
     document.getElementById('freeText').textContent = "Error loading status";
     document.getElementById('premiumText').textContent = "Error loading status";
@@ -543,40 +456,28 @@ async function loadStatus() {
   }
 }
 
-/* ============================
-   TAB SWITCHING
-============================ */
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
     const tab = btn.dataset.tab;
     document.querySelectorAll('.tabPanel').forEach(p => p.style.display='none');
     document.getElementById(tab).style.display='block';
   });
 });
 
-/* ============================
-   LOGOUT
-============================ */
 document.getElementById('logout').addEventListener('click', () => {
   window.location.href = '/api/logout';
 });
 
-/* ============================
-   BOT CONSOLE — SEND MESSAGE (MENTIONS FIX)
-============================ */
 document.getElementById('sendMsg').addEventListener('click', async () => {
   try {
     const channelId = document.getElementById('channelSelect').value;
     let content = document.getElementById('messageContent').value;
 
-    /* checkbox mentions */
     const mentionEveryone = document.getElementById('mentionEveryone').checked;
     const mentionHere = document.getElementById('mentionHere').checked;
 
-    /* role search */
     const roleName = document.getElementById('mentionRoleName').value.trim();
     let mentionRoleId = null;
     if (roleName.length > 0) {
@@ -586,7 +487,6 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
       if (roleData.match) mentionRoleId = roleData.match.id;
     }
 
-    /* user search */
     const userName = document.getElementById('mentionUserName').value.trim();
     let mentionUserId = null;
     if (userName.length > 0) {
@@ -596,7 +496,6 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
       if (userData.match) mentionUserId = userData.match.id;
     }
 
-    /* build prefix with mentions */
     let prefix = "";
     if (mentionEveryone) prefix += "@everyone ";
     if (mentionHere) prefix += "@here ";
@@ -605,10 +504,7 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
 
     content = prefix + content;
 
-    const body = {
-      channelId,
-      content
-    };
+    const body = { channelId, content };
 
     const res = await safeFetchJson('/api/bot/sendMessage', {
       method:"POST",
@@ -622,16 +518,14 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
   } catch (err) {
     document.getElementById('sendResult').textContent = `Error: ${err.message}`;
   }
-});
+}
 
-/* ============================
-   ADMIN TOOLS — SEARCH USERS
-============================ */
+);
+
 document.getElementById('adminUserSearch').addEventListener('input', async (e) => {
   const q = e.target.value.trim();
   const box = document.getElementById('adminUserResults');
   box.innerHTML = "";
-
   if (q.length < 1) return;
 
   const data = await safeFetchJson(`/api/admin/members?search=${encodeURIComponent(q)}`, {
@@ -652,14 +546,10 @@ document.getElementById('adminUserSearch').addEventListener('input', async (e) =
   });
 });
 
-/* ============================
-   ADMIN TOOLS — SEARCH ROLES
-============================ */
 document.getElementById('adminRoleSearch').addEventListener('input', async (e) => {
   const q = e.target.value.trim();
   const box = document.getElementById('adminRoleResults');
   box.innerHTML = "";
-
   if (q.length < 1) return;
 
   const data = await safeFetchJson(`/api/admin/roles?search=${encodeURIComponent(q)}`, {
@@ -680,19 +570,17 @@ document.getElementById('adminRoleSearch').addEventListener('input', async (e) =
   });
 });
 
-/* ============================
-   ADMIN ACTIONS
-============================ */
 async function adminAction(type) {
   const userId = window._adminSelectedUser;
   const roleId = window._adminSelectedRole;
+  const dmMessage = document.getElementById('adminDMMessage')?.value || null;
 
   if (!userId) {
     document.getElementById('adminLog').innerHTML += "<div>No user selected</div>";
     return;
   }
 
-  const body = { type, userId, roleId };
+  const body = { type, userId, roleId, dmMessage };
 
   const res = await safeFetchJson('/api/admin/actions', {
     method:"POST",
@@ -711,9 +599,6 @@ document.getElementById('adminKick').addEventListener('click', () => adminAction
 document.getElementById('adminBan').addEventListener('click', () => adminAction("ban"));
 document.getElementById('adminDM').addEventListener('click', () => adminAction("dm"));
 
-/* ============================
-   INIT
-============================ */
 loadUser();
 loadChannels();
 loadStatus();
