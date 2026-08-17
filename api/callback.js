@@ -1,25 +1,39 @@
-// /api/callback.js
+// /api/callback.js — DEBUG VERSION (no redirect)
 export default async function handler(req, res) {
   try {
     const { code, state } = req.query;
 
-    // Missing OAuth parameters
-    if (!code || !state) {
-      return res.redirect("/panel.html?error=missing_code_or_state");
-    }
-
-    // Read state cookie
     const cookie = req.headers.cookie || "";
-    const match = cookie.match(/archnem_oauth_state=([^;]+)/);
-    const savedState = match ? match[1] : null;
+    const stateMatch = cookie.match(/archnem_oauth_state=([^;]+)/);
+    const savedState = stateMatch ? stateMatch[1] : null;
 
-    // State mismatch
-    if (!savedState || savedState !== state) {
-      res.setHeader("Set-Cookie", "archnem_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None");
-      return res.redirect("/panel.html?error=invalid_state");
+    // jeśli w ogóle nie ma code/state → pokaż to w JSON
+    if (!code || !state) {
+      return res.status(400).json({
+        step: "initial",
+        error: "missing_code_or_state",
+        query: { code, state },
+        cookie,
+        savedState
+      });
     }
 
-    // Exchange code for token
+    // jeśli state się nie zgadza → pokaż dokładnie co przyszło
+    if (!savedState || savedState !== state) {
+      res.setHeader(
+        "Set-Cookie",
+        "archnem_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None"
+      );
+
+      return res.status(400).json({
+        step: "state_check",
+        error: "invalid_state",
+        query: { code, state },
+        cookie,
+        savedState
+      });
+    }
+
     const params = new URLSearchParams({
       client_id: process.env.CLIENT_ID,
       client_secret: process.env.CLIENT_SECRET,
@@ -34,24 +48,42 @@ export default async function handler(req, res) {
       body: params
     });
 
-    const tokenData = await tokenResponse.json();
-
-    if (!tokenData.access_token) {
-      res.setHeader("Set-Cookie", "archnem_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None");
-      return res.redirect("/panel.html?error=token_failed");
+    const rawText = await tokenResponse.text();
+    let tokenData = {};
+    try {
+      tokenData = JSON.parse(rawText);
+    } catch {
+      tokenData = { parse_error: true, raw: rawText };
     }
 
-    // Set session cookie
+    if (!tokenData.access_token) {
+      return res.status(400).json({
+        step: "token_exchange",
+        error: "token_failed",
+        status: tokenResponse.status,
+        body: tokenData
+      });
+    }
+
+    // ustaw cookie, ale nadal NIE redirectujemy
     res.setHeader("Set-Cookie", [
       "archnem_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None",
       `token=${encodeURIComponent(tokenData.access_token)}; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=None`
     ]);
 
-    // Redirect to panel
-    return res.redirect("/panel.html");
+    return res.status(200).json({
+      step: "success",
+      message: "callback_ok",
+      query: { code, state },
+      savedState,
+      tokenPreview: tokenData.access_token ? tokenData.access_token.slice(0, 16) + "..." : null
+    });
 
   } catch (err) {
-    console.error("callback error:", err);
-    return res.redirect("/panel.html?error=server_error");
+    return res.status(500).json({
+      step: "exception",
+      error: "server_error",
+      details: String(err)
+    });
   }
 }
