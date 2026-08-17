@@ -2,17 +2,24 @@
 export default async function handler(req, res) {
   try {
     const { code, state } = req.query;
-    if (!code || !state) return res.redirect("/panel.html?error=missing_code_or_state");
 
-    // verify state cookie
+    // Missing OAuth parameters
+    if (!code || !state) {
+      return res.redirect("/panel.html?error=missing_code_or_state");
+    }
+
+    // Read state cookie
     const cookie = req.headers.cookie || "";
-    const stateMatch = cookie.match(/archnem_oauth_state=([^;]+)/);
-    const savedState = stateMatch ? stateMatch[1] : null;
+    const match = cookie.match(/archnem_oauth_state=([^;]+)/);
+    const savedState = match ? match[1] : null;
+
+    // State mismatch
     if (!savedState || savedState !== state) {
-      res.setHeader("Set-Cookie", "archnem_oauth_state=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0");
+      res.setHeader("Set-Cookie", "archnem_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None");
       return res.redirect("/panel.html?error=invalid_state");
     }
 
+    // Exchange code for token
     const params = new URLSearchParams({
       client_id: process.env.CLIENT_ID,
       client_secret: process.env.CLIENT_SECRET,
@@ -29,29 +36,22 @@ export default async function handler(req, res) {
 
     const tokenData = await tokenResponse.json();
 
-    if (!tokenData || !tokenData.access_token) {
-      console.error("callback: token exchange failed", tokenData);
-      res.setHeader("Set-Cookie", "archnem_oauth_state=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0");
+    if (!tokenData.access_token) {
+      res.setHeader("Set-Cookie", "archnem_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None");
       return res.redirect("/panel.html?error=token_failed");
     }
 
-    // SECURITY: never expose BOT_TOKEN to frontend
-    if (process.env.BOT_TOKEN && tokenData.access_token === process.env.BOT_TOKEN) {
-      console.error("Security: received token equals BOT_TOKEN — aborting");
-      res.setHeader("Set-Cookie", "archnem_oauth_state=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0");
-      return res.redirect("/panel.html?error=server_security");
-    }
-
-    // set HttpOnly cookie named "token" and remove state cookie
+    // Set session cookie
     res.setHeader("Set-Cookie", [
-      "archnem_oauth_state=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0",
-      `token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${60 * 60}`
+      "archnem_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None",
+      `token=${encodeURIComponent(tokenData.access_token)}; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=None`
     ]);
 
-    // redirect to panel on same domain (no token in URL)
+    // Redirect to panel
     return res.redirect("/panel.html");
+
   } catch (err) {
-    console.error("callback.js error:", err);
+    console.error("callback error:", err);
     return res.redirect("/panel.html?error=server_error");
   }
 }
