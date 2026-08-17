@@ -3,176 +3,114 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Archnemesis — Panel (Diagnostics)</title>
+  <title>Archnemesis — Panel</title>
   <style>
     :root{ --bg:#0b1220; --card:rgba(255,255,255,0.06); --text:#eaeaea; --accent:#d28cff; --muted:#9aa6b2; }
     [data-theme="light"]{ --bg:#f6f7fb; --card:rgba(10,10,12,0.04); --text:#0b1220; --accent:#6b21a8; --muted:#4b5563; }
-    body{ margin:0; font-family:Inter,Segoe UI,Arial; background:linear-gradient(135deg,var(--bg),#0a0a0a); color:var(--text); padding:28px; transition:all .2s; }
+    body{ margin:0; font-family:Inter,Segoe UI,Arial; background:linear-gradient(135deg,var(--bg),#0a0a0a); color:var(--text); padding:28px; }
     .container{ max-width:980px; margin:auto; }
     .header{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
-    .title{ font-size:22px; color:var(--accent); font-weight:700; }
-    .controls{ display:flex; gap:8px; align-items:center; }
     .btn{ background:var(--card); border-radius:8px; padding:8px 12px; color:var(--text); border:1px solid rgba(255,255,255,0.06); cursor:pointer; }
-    .card{ background:var(--card); border-radius:12px; padding:16px; backdrop-filter:blur(6px); }
-    .row{ display:flex; gap:12px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
-    .label{ color:var(--muted); font-size:13px; min-width:120px; }
-    pre{ background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; overflow:auto; max-height:360px; }
-    .small{ font-size:13px; color:var(--muted); }
+    .card{ background:var(--card); border-radius:12px; padding:16px; }
+    .avatar{ width:88px; height:88px; border-radius:50%; object-fit:cover; border:3px solid var(--accent); }
+    .roles{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .role{ padding:6px 10px; border-radius:999px; background:rgba(255,255,255,0.12); color:#071022; font-weight:600; }
     .error{ color:#ff6b6b; }
-    footer{ margin-top:18px; color:var(--muted); font-size:13px; text-align:center; }
-    input.token { width:420px; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--text); }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <div>
-        <div class="title">Archnemesis — Diagnostics</div>
-        <div class="small">Flow: OAuth → callback → panel (token in sessionStorage)</div>
+        <h1 style="margin:0;color:var(--accent)">Archnemesis</h1>
+        <div style="color:var(--muted)">Panel użytkownika</div>
       </div>
-
-      <div class="controls">
-        <button class="btn" id="theme-toggle">Dark</button>
+      <div>
         <button class="btn" id="logout">Wyloguj</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="row">
-        <div class="label">Access token</div>
-        <input id="tokenInput" class="token" placeholder="Brak tokena" readonly />
-        <button class="btn" id="copyToken">Kopiuj</button>
-        <button class="btn" id="clearToken">Wyczyść</button>
+      <div id="status">Ładowanie danych...</div>
+
+      <div id="userArea" style="display:none;">
+        <div style="display:flex;gap:16px;align-items:center;margin-top:12px;">
+          <img id="avatar" class="avatar" src="" alt="avatar">
+          <div>
+            <div id="username" style="font-weight:700;font-size:18px"></div>
+            <div id="user-sub" style="color:var(--muted)"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;color:var(--muted)">Twoje rangi:</div>
+        <div class="roles" id="roles"></div>
       </div>
 
-      <div class="row">
-        <div class="label">Actions</div>
-        <button class="btn" id="runDiag">Run diagnostics</button>
-        <button class="btn" id="runDiagNoDebug">Get user (no debug)</button>
-        <button class="btn" id="openLogin">Open login</button>
-      </div>
-
-      <div class="row">
-        <div class="label">Last status</div>
-        <div id="statusText" class="small">—</div>
-      </div>
-
-      <div style="margin-top:12px;">
-        <div class="label">Diagnostics output</div>
-        <pre id="output">No diagnostics run yet.</pre>
-      </div>
+      <div id="errorBox" class="error" style="display:none;margin-top:12px;"></div>
     </div>
-
-    <footer>© Archnemesis</footer>
   </div>
 
   <script>
-    // Theme
-    let THEME = localStorage.getItem("archnem_theme") || "dark";
-    function applyTheme() {
-      document.documentElement.setAttribute("data-theme", THEME === "dark" ? "dark" : "light");
-      document.getElementById("theme-toggle").textContent = THEME === "dark" ? "Dark" : "Light";
-    }
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-      THEME = THEME === "dark" ? "light" : "dark";
-      localStorage.setItem("archnem_theme", THEME);
-      applyTheme();
-    });
-    applyTheme();
-
-    // Elements
-    const tokenInput = document.getElementById("tokenInput");
-    const copyBtn = document.getElementById("copyToken");
-    const clearBtn = document.getElementById("clearToken");
-    const runDiagBtn = document.getElementById("runDiag");
-    const runDiagNoDebugBtn = document.getElementById("runDiagNoDebug");
-    const outputEl = document.getElementById("output");
-    const statusEl = document.getElementById("statusText");
-    const logoutBtn = document.getElementById("logout");
-    const openLoginBtn = document.getElementById("openLogin");
-
-    // Token handling: copy from URL -> sessionStorage -> remove from URL
-    (function handleTokenInUrl() {
-      const url = new URL(window.location.href);
-      const urlToken = url.searchParams.get("access_token");
-      if (urlToken) {
-        sessionStorage.setItem("archnem_token", urlToken);
-        url.searchParams.delete("access_token");
-        window.history.replaceState({}, document.title, url.pathname + url.search);
-      }
-      const t = sessionStorage.getItem("archnem_token");
-      if (t) tokenInput.value = t;
+    // Usuń token z URL jeśli przypadkowo się pojawił (dodatkowa ochrona)
+    (function removeTokenFromUrl() {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("access_token")) {
+          url.searchParams.delete("access_token");
+          window.history.replaceState({}, document.title, url.pathname + url.search);
+        }
+      } catch (e) { /* ignore */ }
     })();
 
-    copyBtn.addEventListener("click", async () => {
-      const t = sessionStorage.getItem("archnem_token") || "";
-      if (!t) return alert("Brak tokena");
-      await navigator.clipboard.writeText(t);
-      statusEl.textContent = "Token skopiowany do schowka";
-    });
-
-    clearBtn.addEventListener("click", () => {
-      sessionStorage.removeItem("archnem_token");
-      tokenInput.value = "";
-      statusEl.textContent = "Token usunięty";
-      outputEl.textContent = "No diagnostics run yet.";
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      sessionStorage.removeItem("archnem_token");
+    document.getElementById("logout").addEventListener("click", () => {
+      // wyczyść ewentualne sessionStorage i wywołaj backend logout
+      try { sessionStorage.removeItem("archnem_token"); } catch(e) {}
       window.location.href = "/api/logout";
     });
 
-    openLoginBtn.addEventListener("click", () => {
-      // gotowy link OAuth (zmień client_id jeśli trzeba)
-      const link = "https://discord.com/api/oauth2/authorize?response_type=code&client_id=1532718787139207301&scope=identify%20guilds%20email%20guilds.join%20connections%20guilds.members.read&redirect_uri=https%3A%2F%2Farchnem-oauth.vercel.app%2Fapi%2Fcallback&prompt=consent";
-      window.location.href = link;
-    });
-
-    // Diagnostics call
-    async function runDiagnostics(debug = true) {
-      const token = sessionStorage.getItem("archnem_token");
-      if (!token) {
-        statusEl.textContent = "No session. Log in with Discord.";
-        outputEl.textContent = "Brak tokena w sessionStorage. Zaloguj się przez Discord (Open login).";
-        return;
-      }
-      tokenInput.value = token;
-      statusEl.textContent = "Running diagnostics...";
-      outputEl.textContent = "Running...";
-
-      try {
-        const url = `/api/user?access_token=${encodeURIComponent(token)}${debug ? "&debug=1" : ""}`;
-        const r = await fetch(url);
-        const text = await r.text();
-        let parsed;
-        try { parsed = JSON.parse(text); } catch (e) { parsed = { raw: text }; }
-
-        outputEl.textContent = JSON.stringify({
-          httpStatus: r.status,
-          body: parsed
-        }, null, 2);
-
-        if (r.status >= 400) {
-          statusEl.textContent = `Error ${r.status}`;
-        } else {
-          statusEl.textContent = "OK";
+    // Pobierz dane użytkownika z backendu (cookie HttpOnly wysyłane automatycznie)
+    fetch("/api/user")
+      .then(async r => {
+        if (!r.ok) {
+          const body = await r.json().catch(()=>({}));
+          throw new Error(body.error || "Server error");
         }
-      } catch (err) {
+        return r.json();
+      })
+      .then(data => {
+        document.getElementById("userArea").style.display = "block";
+        document.getElementById("status").textContent = `Zalogowany jako ${data.username}#${data.discriminator}`;
+
+        const avatarEl = document.getElementById("avatar");
+        if (data.avatar) {
+          avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
+        } else {
+          avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
+        }
+
+        document.getElementById("username").textContent = `${data.username}#${data.discriminator}`;
+
+        const rolesEl = document.getElementById("roles");
+        rolesEl.innerHTML = "";
+        const roleIds = Array.isArray(data.roles) ? data.roles : [];
+        if (!roleIds.length) {
+          rolesEl.innerHTML = `<div style="color:var(--muted)">Brak ról</div>`;
+          return;
+        }
+        roleIds.forEach(rid => {
+          const el = document.createElement("div");
+          el.className = "role";
+          el.textContent = rid;
+          rolesEl.appendChild(el);
+        });
+      })
+      .catch(err => {
         console.error(err);
-        statusEl.textContent = "Network error";
-        outputEl.textContent = "Network error: " + (err.message || err);
-      }
-    }
-
-    runDiagBtn.addEventListener("click", () => runDiagnostics(true));
-    runDiagNoDebugBtn.addEventListener("click", () => runDiagnostics(false));
-
-    // Auto-run diagnostics if token present (non-blocking)
-    if (sessionStorage.getItem("archnem_token")) {
-      // small delay to let UI render
-      setTimeout(() => runDiagnostics(true), 300);
-    }
+        document.getElementById("status").textContent = "Brak sesji. Zaloguj się przez Discord.";
+        const eb = document.getElementById("errorBox");
+        eb.style.display = "block";
+        eb.textContent = err.message || "Błąd sieci";
+      });
   </script>
 </body>
 </html>
