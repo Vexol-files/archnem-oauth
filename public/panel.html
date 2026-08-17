@@ -1,48 +1,158 @@
-<!-- public/panel.html -->
 <!doctype html>
-<html lang="pl">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Panel</title>
+  <title>Archnem — Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body{font-family:Inter,Arial,Helvetica,sans-serif;background:#0b1220;color:#eaeaea;padding:28px}
-    .card{background:rgba(255,255,255,0.04);padding:18px;border-radius:12px;max-width:720px;margin:auto}
-    .btn{background:rgba(255,255,255,0.06);border:0;padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
-    .avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #d28cff}
-    .roles{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .role{padding:6px 10px;border-radius:999px;font-weight:700;border:1px solid rgba(0,0,0,0.08)}
-    .role.no-color{background:rgba(255,255,255,0.06);color:#eaeaea}
-    .muted{color:#9aa6b2}
+    :root{
+      --bg:#0b1220; --card:rgba(255,255,255,0.04); --muted:#9aa6b2; --accent:#7c3aed;
+      --glass: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef8;background:linear-gradient(180deg,var(--bg),#05060a);-webkit-font-smoothing:antialiased}
+    .wrap{max-width:980px;margin:36px auto;padding:20px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#6b21a8,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;color:white}
+    .title{font-size:18px;font-weight:700;color:var(--accent)}
+    .sub{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .btn{background:var(--card);border:0;padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+    .avatar{width:88px;height:88px;border-radius:14px;object-fit:cover;border:3px solid rgba(255,255,255,0.06)}
+    .info-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .muted{color:var(--muted);font-size:13px}
+    .roles{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .role-pill{padding:6px 10px;border-radius:999px;font-weight:700;border:1px solid rgba(0,0,0,0.06)}
+    .role-no-color{background:rgba(255,255,255,0.03);color:#e6eef8}
+    .tabs{display:flex;gap:8px;margin-bottom:12px}
+    .tab{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    .tab.active{background:linear-gradient(90deg,#0f1724,#0b1220);border-color:rgba(255,255,255,0.06)}
+    .section-title{font-weight:700;margin-bottom:8px}
+    .field{font-size:14px;color:#cfe6ff;margin-bottom:6px}
+    textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    input[type="text"]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .small{font-size:13px;color:var(--muted)}
+    footer{margin-top:18px;color:var(--muted);text-align:center}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2 id="status">Ładowanie...</h2>
-    <div id="userArea" style="display:none">
-      <div style="display:flex;gap:16px;align-items:center">
-        <img id="avatar" class="avatar" src="" alt="avatar">
+  <div class="wrap">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">A</div>
         <div>
-          <div id="username" style="font-weight:700;font-size:18px"></div>
-          <div id="user-sub" class="muted"></div>
+          <div class="title">Archnem Panel</div>
+          <div class="sub">Account & server information</div>
         </div>
       </div>
 
-      <div style="margin-top:12px" class="muted">Twoje rangi:</div>
-      <div class="roles" id="roles"></div>
+      <div class="controls">
+        <button id="logout" class="btn">Logout</button>
+      </div>
     </div>
 
-    <div id="errorBox" style="color:#ff6b6b;margin-top:12px;display:none"></div>
+    <div class="grid">
+      <!-- left column: Informations -->
+      <div class="card" id="leftCard">
+        <div id="accountBlock">
+          <div style="display:flex;gap:12px;align-items:center">
+            <img id="avatar" class="avatar" src="" alt="avatar">
+            <div>
+              <div id="displayName" style="font-weight:700;font-size:16px">—</div>
+              <div id="subText" class="muted">—</div>
+            </div>
+          </div>
 
-    <div style="margin-top:16px">
-      <button id="logout" class="btn">Wyloguj</button>
-      <a href="/api/login" class="btn" style="margin-left:8px">Zaloguj ponownie</a>
+          <div style="margin-top:12px">
+            <div class="section-title">Informations</div>
+            <div class="field"><strong>ID:</strong> <span id="userId" class="small">—</span></div>
+            <div class="field"><strong>Account:</strong> <span id="accountEmail" class="small">—</span></div>
+            <div class="field"><strong>Highest role:</strong> <span id="highestRole" class="small">—</span></div>
+            <div style="margin-top:8px" class="muted">Nickname color is taken from your highest role.</div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div class="section-title">Roles</div>
+            <div id="roles" class="roles"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right column: tabs -->
+      <div class="card" id="rightCard">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="overview">Overview</button>
+          <button class="tab" data-tab="bot">Bot</button>
+        </div>
+
+        <div id="tabContent">
+          <!-- Overview -->
+          <div id="overview" class="tabPanel">
+            <div class="section-title">Account summary</div>
+            <div class="muted">Quick actions and account details</div>
+            <div style="margin-top:12px">
+              <div class="small"><strong>Username</strong></div>
+              <div id="usernameLine" class="field">—</div>
+            </div>
+            <div style="margin-top:12px">
+              <div class="small"><strong>Roles (highest → lowest)</strong></div>
+              <div id="roleList" class="roles" style="margin-top:8px"></div>
+            </div>
+          </div>
+
+          <!-- Bot tab -->
+          <div id="bot" class="tabPanel" style="display:none">
+            <div class="section-title">Bot Console</div>
+            <div class="muted">Actions are executed by the server bot token. You must be authorized to use these features.</div>
+
+            <div style="margin-top:12px">
+              <div class="small"><strong>Send message to channel</strong></div>
+              <input id="channelId" type="text" placeholder="Channel ID" />
+              <textarea id="messageContent" placeholder="Message content"></textarea>
+              <button id="sendMsg" class="btn">Send as Bot</button>
+              <div id="sendResult" class="small" style="margin-top:8px"></div>
+            </div>
+
+            <div style="margin-top:16px">
+              <div class="small"><strong>Member actions</strong></div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <input id="targetUser" type="text" placeholder="User ID" />
+                <button id="banBtn" class="btn">Ban</button>
+                <button id="kickBtn" class="btn">Kick</button>
+              </div>
+              <div id="memberResult" class="small" style="margin-top:8px"></div>
+            </div>
+
+            <div style="margin-top:16px">
+              <div class="small"><strong>Channel / Role management</strong></div>
+              <div style="margin-top:8px" class="small">Create/delete channels, create roles, change colors — available only if server authorizes you.</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <footer>© Archnem</footer>
   </div>
 
   <script>
-    // remove token from URL if present
-    (function removeTokenFromUrl() {
+    // Tabs
+    document.querySelectorAll('.tab').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tabPanel').forEach(p=>p.style.display='none');
+        document.getElementById(tab).style.display = 'block';
+      });
+    });
+
+    // Remove token from URL if present
+    (function removeTokenFromUrl(){
       try {
         const url = new URL(window.location.href);
         if (url.searchParams.has("token") || url.searchParams.has("access_token")) {
@@ -53,6 +163,7 @@
       } catch(e){}
     })();
 
+    // Contrast helper
     function contrastColor(hex) {
       if (!hex) return "#ffffff";
       const h = hex.replace("#","");
@@ -63,61 +174,134 @@
       return luminance > 0.6 ? "#071022" : "#ffffff";
     }
 
+    // Load user and roles
     async function loadUser() {
       try {
-        const r = await fetch("/api/user", { credentials: "same-origin" });
+        const r = await fetch('/api/user', { credentials: 'same-origin' });
         if (!r.ok) {
           const body = await r.json().catch(()=>({}));
-          throw new Error(body.error || "Server error");
+          throw new Error(body.error || 'Server error');
         }
         const data = await r.json();
-        document.getElementById("userArea").style.display = "block";
-        document.getElementById("status").textContent = `Zalogowany jako ${data.username}#${data.discriminator}`;
 
-        const avatarEl = document.getElementById("avatar");
-        if (data.avatar) {
-          avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
+        // Basic info
+        document.getElementById('displayName').textContent = `${data.username}#${data.discriminator}`;
+        document.getElementById('userId').textContent = data.id;
+        document.getElementById('usernameLine').textContent = `${data.username}#${data.discriminator}`;
+        document.getElementById('accountEmail').textContent = data.email || '—';
+
+        // Avatar
+        const avatarEl = document.getElementById('avatar');
+        if (data.avatar) avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
+        else avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
+
+        // Roles: already sorted highest -> lowest by server
+        const rolesEl = document.getElementById('roles');
+        const roleList = document.getElementById('roleList');
+        rolesEl.innerHTML = '';
+        roleList.innerHTML = '';
+
+        const roles = Array.isArray(data.roles) ? data.roles : [];
+
+        // Highest role color for nickname color
+        const highest = roles.length ? roles[0] : null;
+        document.getElementById('highestRole').textContent = highest ? highest.name : '—';
+        if (highest && highest.color) {
+          document.getElementById('displayName').style.color = highest.color;
         } else {
-          avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
+          document.getElementById('displayName').style.color = '';
         }
 
-        document.getElementById("username").textContent = `${data.username}#${data.discriminator}`;
-
-        const rolesEl = document.getElementById("roles");
-        rolesEl.innerHTML = "";
-        const roleObjs = Array.isArray(data.roles) ? data.roles : [];
-
-        if (!roleObjs.length) {
-          rolesEl.innerHTML = `<div class="muted">Brak ról</div>`;
-          return;
-        }
-
-        // roles are expected already sorted by server (highest -> lowest)
-        roleObjs.forEach(r => {
-          const el = document.createElement("div");
-          el.className = "role";
-          if (!r.color) el.classList.add("no-color");
-          el.textContent = r.name || r.id;
+        // Render pills
+        roles.forEach(r=>{
+          const pill = document.createElement('div');
+          pill.className = 'role-pill';
+          if (!r.color) pill.classList.add('role-no-color');
+          pill.textContent = r.name || r.id;
           if (r.color) {
-            el.style.background = r.color;
-            el.style.color = contrastColor(r.color);
+            pill.style.background = r.color;
+            pill.style.color = contrastColor(r.color);
+            pill.style.border = '1px solid rgba(0,0,0,0.08)';
           }
-          rolesEl.appendChild(el);
+          rolesEl.appendChild(pill);
+
+          // also in overview list
+          const pill2 = pill.cloneNode(true);
+          roleList.appendChild(pill2);
         });
+
       } catch (err) {
         console.error(err);
-        document.getElementById("status").textContent = "Brak sesji. Zaloguj się przez Discord.";
-        const eb = document.getElementById("errorBox");
-        eb.style.display = "block";
-        eb.textContent = err.message || "Błąd sieci";
+        document.getElementById('status').textContent = 'Not signed in. Please log in via Discord.';
+        const eb = document.getElementById('errorBox');
+        eb.style.display = 'block';
+        eb.textContent = err.message || 'Network error';
       }
     }
 
-    document.getElementById("logout").addEventListener("click", () => {
-      try { sessionStorage.removeItem("archnem_token"); } catch(e){}
-      window.location.href = "/api/logout";
+    // Logout
+    document.getElementById('logout').addEventListener('click', ()=>{
+      try { sessionStorage.removeItem('archnem_token'); } catch(e){}
+      window.location.href = '/api/logout';
     });
 
+    // Bot actions
+    document.getElementById('sendMsg').addEventListener('click', async ()=>{
+      const channelId = document.getElementById('channelId').value.trim();
+      const content = document.getElementById('messageContent').value.trim();
+      const out = document.getElementById('sendResult');
+      out.textContent = 'Sending...';
+      try {
+        const r = await fetch('/api/bot/sendMessage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelId, content })
+        });
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.error || 'Failed');
+        out.textContent = 'Message sent';
+      } catch (err) {
+        out.textContent = 'Error: ' + (err.message || err);
+      }
+    });
+
+    document.getElementById('banBtn').addEventListener('click', async ()=>{
+      const userId = document.getElementById('targetUser').value.trim();
+      const out = document.getElementById('memberResult');
+      out.textContent = 'Processing...';
+      try {
+        const r = await fetch('/api/bot/ban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.error || 'Failed');
+        out.textContent = 'User banned';
+      } catch (err) {
+        out.textContent = 'Error: ' + (err.message || err);
+      }
+    });
+
+    document.getElementById('kickBtn').addEventListener('click', async ()=>{
+      const userId = document.getElementById('targetUser').value.trim();
+      const out = document.getElementById('memberResult');
+      out.textContent = 'Processing...';
+      try {
+        const r = await fetch('/api/bot/kick', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.error || 'Failed');
+        out.textContent = 'User kicked';
+      } catch (err) {
+        out.textContent = 'Error: ' + (err.message || err);
+      }
+    });
+
+    // init
     loadUser();
   </script>
 </body>
