@@ -1,13 +1,15 @@
-// /api/user.js (bezpieczny)
+// /api/user.js
 export default async function handler(req, res) {
   try {
-    const access_token = req.query.access_token || (req.headers.cookie || "").match(/archnem_token1=([^;]+)/)?.[1];
+    const cookieHeader = req.headers.cookie || "";
+    const match = cookieHeader.match(/token=([^;]+)/);
+    const access_token = match ? decodeURIComponent(match[1]) : null;
 
-    if (!access_token) return res.status(400).json({ error: "Missing access_token" });
+    if (!access_token) return res.status(401).json({ error: "Missing session. Please log in." });
 
-    // SECURITY: reject if frontend accidentally passed BOT_TOKEN
+    // SECURITY: reject if someone accidentally provided BOT_TOKEN as access_token
     if (process.env.BOT_TOKEN && access_token === process.env.BOT_TOKEN) {
-      console.error("Security: frontend provided BOT_TOKEN as access_token");
+      console.error("Security: received BOT_TOKEN as access_token");
       return res.status(400).json({ error: "Invalid token" });
     }
 
@@ -18,18 +20,21 @@ export default async function handler(req, res) {
 
     if (userResp.status !== 200) {
       const body = await userResp.text();
-      return res.status(400).json({ error: "Invalid access_token", details: body });
+      console.error("user fetch failed:", userResp.status, body);
+      return res.status(401).json({ error: "Invalid session or token expired" });
     }
 
     const userData = await userResp.json();
 
-    // ensure env present
+    // server-side checks
     if (!process.env.GUILD_ID || !process.env.BOT_TOKEN) {
+      console.error("Server misconfiguration: missing GUILD_ID or BOT_TOKEN");
       return res.status(500).json({ error: "Server misconfiguration" });
     }
 
     // fetch guild member using BOT_TOKEN (server-side only)
-    const guildResp = await fetch(`https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`, {
+    const guildUrl = `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`;
+    const guildResp = await fetch(guildUrl, {
       headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` }
     });
 
