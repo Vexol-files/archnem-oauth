@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Login</title>
+</head>
+<body style="background:#0b1220;color:white;font-family:Arial;padding:40px">
+
+<h2>Logging in...</h2>
+
+<script>
+  // generate random state
+  const state = crypto.randomUUID();
+
+  // set cookie for callback
+  document.cookie = `archnem_oauth_state=${state}; Path=/; Secure; SameSite=None`;
+
+  // redirect to Discord OAuth
+  const params = new URLSearchParams({
+    client_id: "1532718787139207301",
+    response_type: "code",
+    redirect_uri: "https://archnem-oauth.vercel.app/api/callback",
+    scope: "identify guilds gdm.join email guilds.join connections guilds.members.read",
+    state
+  });
+
+  window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
+</script>
+
+</body>
+</html>
