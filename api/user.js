@@ -1,25 +1,18 @@
+// /api/user.js
 export default async function handler(req, res) {
   try {
     res.setHeader("Content-Type", "application/json");
 
-    const cookieHeader = req.headers.cookie || "";
-    const match = cookieHeader.match(/token=([^;]+)/);
+    // Read session cookie
+    const cookie = req.headers.cookie || "";
+    const match = cookie.match(/token=([^;]+)/);
     const access_token = match ? decodeURIComponent(match[1]) : null;
 
     if (!access_token) {
       return res.status(401).json({ error: "Missing session token" });
     }
 
-    if (!process.env.GUILD_ID || !process.env.BOT_TOKEN) {
-      return res.status(500).json({
-        error: "Server misconfiguration",
-        missing: {
-          GUILD_ID: !process.env.GUILD_ID,
-          BOT_TOKEN: !process.env.BOT_TOKEN
-        }
-      });
-    }
-
+    // Fetch user info
     const userResp = await fetch("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${access_token}` }
     });
@@ -34,14 +27,11 @@ export default async function handler(req, res) {
 
     const userData = await userResp.json();
 
+    // Fetch guild roles
     const rolesResp = await fetch(
       `https://discord.com/api/guilds/${process.env.GUILD_ID}/roles`,
       { headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` } }
     );
-
-    if (!rolesResp.ok) {
-      return res.status(500).json({ error: "Failed to fetch guild roles" });
-    }
 
     const rolesList = await rolesResp.json();
     const roleMap = {};
@@ -50,22 +40,20 @@ export default async function handler(req, res) {
       roleMap[r.id] = { id: r.id, name: r.name, color: hex, position: r.position };
     }
 
+    // Fetch member roles
     const memberResp = await fetch(
       `https://discord.com/api/guilds/${process.env.GUILD_ID}/members/${userData.id}`,
       { headers: { Authorization: `Bot ${process.env.BOT_TOKEN}` } }
     );
 
-    if (!memberResp.ok) {
-      return res.status(200).json({
-        ...userData,
-        roles: []
-      });
-    }
+    let userRoles = [];
 
-    const member = await memberResp.json();
-    const userRoles = member.roles
-      .map(id => roleMap[id] || { id, name: id, color: null, position: 0 })
-      .sort((a, b) => b.position - a.position);
+    if (memberResp.ok) {
+      const member = await memberResp.json();
+      userRoles = member.roles
+        .map(id => roleMap[id] || { id, name: id, color: null, position: 0 })
+        .sort((a, b) => b.position - a.position);
+    }
 
     return res.status(200).json({
       id: userData.id,
