@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     if (req.method !== "POST")
       return res.status(405).json({ error: "Method not allowed" });
 
-    const { type, userId, roleId } = req.body;
+    const { type, userId, roleId, dmMessage } = req.body;
 
     if (!userId)
       return res.status(400).json({ error: "Missing userId" });
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
       message = `User ${userId} banned`;
     }
 
-    // DM
+    // DM — custom message
     if (type === "dm") {
       const channelResp = await fetch(
         `https://discord.com/api/users/@me/channels`,
@@ -82,7 +82,9 @@ export default async function handler(req, res) {
             Authorization: `Bot ${process.env.BOT_TOKEN}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ content: "Admin sent you a message." })
+          body: JSON.stringify({
+            content: dmMessage || "Admin sent you a message."
+          })
         }
       );
 
