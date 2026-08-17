@@ -3,165 +3,95 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Archnemesis — Panel</title>
+  <title>Archnemesis — Panel (Diagnostics)</title>
   <style>
     :root{ --bg:#0b1220; --card:rgba(255,255,255,0.06); --text:#eaeaea; --accent:#d28cff; --muted:#9aa6b2; }
     [data-theme="light"]{ --bg:#f6f7fb; --card:rgba(10,10,12,0.04); --text:#0b1220; --accent:#6b21a8; --muted:#4b5563; }
     body{ margin:0; font-family:Inter,Segoe UI,Arial; background:linear-gradient(135deg,var(--bg),#0a0a0a); color:var(--text); padding:28px; transition:all .2s; }
     .container{ max-width:980px; margin:auto; }
     .header{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
-    .title{ font-size:26px; color:var(--accent); font-weight:700; }
+    .title{ font-size:22px; color:var(--accent); font-weight:700; }
     .controls{ display:flex; gap:8px; align-items:center; }
-    .btn{ background:var(--card); border-radius:10px; padding:8px 12px; color:var(--text); border:1px solid rgba(255,255,255,0.06); cursor:pointer; }
-    .card{ background:var(--card); border-radius:14px; padding:20px; backdrop-filter:blur(8px); }
-    .user-row{ display:flex; gap:16px; align-items:center; margin-bottom:12px; }
-    .avatar{ width:88px; height:88px; border-radius:50%; border:3px solid var(--accent); object-fit:cover; }
-    .username{ font-size:18px; font-weight:700; }
-    .sub{ color:var(--muted); font-size:13px; }
-    .roles{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-    .role{ padding:8px 12px; border-radius:999px; font-weight:600; background:rgba(255,255,255,0.12); color:#071022; }
-    .error{ color:#ff6b6b; margin-top:10px; }
+    .btn{ background:var(--card); border-radius:8px; padding:8px 12px; color:var(--text); border:1px solid rgba(255,255,255,0.06); cursor:pointer; }
+    .card{ background:var(--card); border-radius:12px; padding:16px; backdrop-filter:blur(6px); }
+    .row{ display:flex; gap:12px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+    .label{ color:var(--muted); font-size:13px; min-width:120px; }
+    pre{ background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; overflow:auto; max-height:360px; }
+    .small{ font-size:13px; color:var(--muted); }
+    .error{ color:#ff6b6b; }
     footer{ margin-top:18px; color:var(--muted); font-size:13px; text-align:center; }
+    input.token { width:420px; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--text); }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <div>
-        <div class="title" id="brand">Archnemesis</div>
-        <div class="sub" id="tagline">Panel użytkownika</div>
+        <div class="title">Archnemesis — Diagnostics</div>
+        <div class="small">Flow: OAuth → callback → panel (token in sessionStorage)</div>
       </div>
 
       <div class="controls">
-        <div>
-          <button class="btn" id="lang-pl">PL</button>
-          <button class="btn" id="lang-en">EN</button>
-        </div>
-        <div>
-          <button class="btn" id="theme-toggle">Dark</button>
-        </div>
-        <div>
-          <button class="btn" id="logout">Wyloguj</button>
-        </div>
+        <button class="btn" id="theme-toggle">Dark</button>
+        <button class="btn" id="logout">Wyloguj</button>
       </div>
     </div>
 
     <div class="card">
-      <div id="status">Ładowanie...</div>
-
-      <div id="userArea" style="display:none;">
-        <div class="user-row">
-          <img id="avatar" class="avatar" src="" alt="avatar">
-          <div>
-            <div class="username" id="username"></div>
-            <div class="sub" id="user-sub"></div>
-          </div>
-        </div>
-
-        <div class="sub" id="roles-title">Twoje rangi:</div>
-        <div class="roles" id="roles"></div>
+      <div class="row">
+        <div class="label">Access token</div>
+        <input id="tokenInput" class="token" placeholder="Brak tokena" readonly />
+        <button class="btn" id="copyToken">Kopiuj</button>
+        <button class="btn" id="clearToken">Wyczyść</button>
       </div>
 
-      <div id="errorBox" class="error" style="display:none;"></div>
+      <div class="row">
+        <div class="label">Actions</div>
+        <button class="btn" id="runDiag">Run diagnostics</button>
+        <button class="btn" id="runDiagNoDebug">Get user (no debug)</button>
+        <button class="btn" id="openLogin">Open login</button>
+      </div>
+
+      <div class="row">
+        <div class="label">Last status</div>
+        <div id="statusText" class="small">—</div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="label">Diagnostics output</div>
+        <pre id="output">No diagnostics run yet.</pre>
+      </div>
     </div>
 
-    <footer id="footer">© Archnemesis</footer>
+    <footer>© Archnemesis</footer>
   </div>
 
   <script>
-    const ROLE_DEFS = {
-      "1532749280220024842": { name: "Premium", color: "#FFD700", hidden: false },
-      "1536693194744660039": { name: "Beta", color: "#C060FF", hidden: false },
-      "1534495312377417868": { name: "Booster", color: "#8A2BE2", hidden: false },
-
-      "1534495410566201427": { name: "Trusted", color: "#FFCCCC", hidden: true },
-      "1532716147093274685": { name: "Moderator", color: "#4FC3F7", hidden: true },
-      "1536692816284094554": { name: "Admin", color: "#FF6666", hidden: true },
-      "1536692884928208936": { name: "HeadAdmin", color: "#FF0000", hidden: true },
-      "1532711838264066129": { name: "Co-Owner", color: "#FF0000", hidden: true },
-
-      "1529827656428818492": { name: "Owner", color: "#FF0000", hidden: true },
-      "1534494523768569897": { name: "Owner Bot", color: "#8B0000", hidden: true }
-    };
-
-    const statusEl = document.getElementById("status");
-    const userArea = document.getElementById("userArea");
-    const avatarEl = document.getElementById("avatar");
-    const usernameEl = document.getElementById("username");
-    const userSubEl = document.getElementById("user-sub");
-    const rolesEl = document.getElementById("roles");
-    const errorBox = document.getElementById("errorBox");
-    const langPlBtn = document.getElementById("lang-pl");
-    const langEnBtn = document.getElementById("lang-en");
-    const themeToggleBtn = document.getElementById("theme-toggle");
-    const logoutBtn = document.getElementById("logout");
-    const brandEl = document.getElementById("brand");
-    const taglineEl = document.getElementById("tagline");
-    const rolesTitleEl = document.getElementById("roles-title");
-    const footerEl = document.getElementById("footer");
-
-    const TEXT = {
-      pl: {
-        loading: "Ładowanie danych...",
-        noSession: "Brak sesji. Zaloguj się przez Discord.",
-        loggedAs: "Zalogowany jako",
-        noRoles: "Brak ról lub bot nie widzi członków serwera.",
-        logout: "Wyloguj",
-        panelTitle: "Panel użytkownika",
-        rolesTitle: "Twoje rangi:",
-        brand: "Archnemesis",
-        footer: "© Archnemesis"
-      },
-      en: {
-        loading: "Loading data...",
-        noSession: "No session. Log in with Discord.",
-        loggedAs: "Logged in as",
-        noRoles: "No roles or bot cannot see server members.",
-        logout: "Logout",
-        panelTitle: "User Panel",
-        rolesTitle: "Your ranks:",
-        brand: "Archnemesis",
-        footer: "© Archnemesis"
-      }
-    };
-
-    let LANG = localStorage.getItem("archnem_lang") || "pl";
+    // Theme
     let THEME = localStorage.getItem("archnem_theme") || "dark";
-
-    function applyLang() {
-      const t = TEXT[LANG];
-      statusEl.textContent = t.loading;
-      taglineEl.textContent = t.panelTitle;
-      rolesTitleEl.textContent = t.rolesTitle;
-      brandEl.textContent = t.brand;
-      footerEl.textContent = t.footer;
-      logoutBtn.textContent = t.logout;
-      themeToggleBtn.textContent = THEME === "dark" ? (LANG === "pl" ? "Ciemny" : "Dark") : (LANG === "pl" ? "Jasny" : "Light");
-    }
-
     function applyTheme() {
       document.documentElement.setAttribute("data-theme", THEME === "dark" ? "dark" : "light");
-      themeToggleBtn.textContent = THEME === "dark" ? (LANG === "pl" ? "Ciemny" : "Dark") : (LANG === "pl" ? "Jasny" : "Light");
+      document.getElementById("theme-toggle").textContent = THEME === "dark" ? "Dark" : "Light";
     }
-
-    langPlBtn.addEventListener("click", () => { LANG = "pl"; localStorage.setItem("archnem_lang", LANG); applyLang(); applyTheme(); });
-    langEnBtn.addEventListener("click", () => { LANG = "en"; localStorage.setItem("archnem_lang", LANG); applyLang(); applyTheme(); });
-
-    themeToggleBtn.addEventListener("click", () => {
+    document.getElementById("theme-toggle").addEventListener("click", () => {
       THEME = THEME === "dark" ? "light" : "dark";
       localStorage.setItem("archnem_theme", THEME);
       applyTheme();
     });
-
-    logoutBtn.addEventListener("click", () => {
-      sessionStorage.removeItem("archnem_token");
-      window.location.href = "/api/logout";
-    });
-
-    applyLang();
     applyTheme();
 
-    // --- Token handling without cookie ---
+    // Elements
+    const tokenInput = document.getElementById("tokenInput");
+    const copyBtn = document.getElementById("copyToken");
+    const clearBtn = document.getElementById("clearToken");
+    const runDiagBtn = document.getElementById("runDiag");
+    const runDiagNoDebugBtn = document.getElementById("runDiagNoDebug");
+    const outputEl = document.getElementById("output");
+    const statusEl = document.getElementById("statusText");
+    const logoutBtn = document.getElementById("logout");
+    const openLoginBtn = document.getElementById("openLogin");
+
+    // Token handling: copy from URL -> sessionStorage -> remove from URL
     (function handleTokenInUrl() {
       const url = new URL(window.location.href);
       const urlToken = url.searchParams.get("access_token");
@@ -170,59 +100,78 @@
         url.searchParams.delete("access_token");
         window.history.replaceState({}, document.title, url.pathname + url.search);
       }
+      const t = sessionStorage.getItem("archnem_token");
+      if (t) tokenInput.value = t;
     })();
 
-    const token = sessionStorage.getItem("archnem_token");
-    if (!token) {
-      statusEl.textContent = TEXT[LANG].noSession;
-      errorBox.style.display = "block";
-      errorBox.textContent = TEXT[LANG].noSession;
-    } else {
-      fetch(`/api/user?access_token=${encodeURIComponent(token)}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.error) {
-            statusEl.textContent = TEXT[LANG].noSession;
-            errorBox.style.display = "block";
-            errorBox.textContent = data.error || "Error";
-            return;
-          }
+    copyBtn.addEventListener("click", async () => {
+      const t = sessionStorage.getItem("archnem_token") || "";
+      if (!t) return alert("Brak tokena");
+      await navigator.clipboard.writeText(t);
+      statusEl.textContent = "Token skopiowany do schowka";
+    });
 
-          userArea.style.display = "block";
-          statusEl.textContent = `${TEXT[LANG].loggedAs} ${data.username}#${data.discriminator}`;
+    clearBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("archnem_token");
+      tokenInput.value = "";
+      statusEl.textContent = "Token usunięty";
+      outputEl.textContent = "No diagnostics run yet.";
+    });
 
-          if (data.avatar) {
-            avatarEl.src = `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
-          } else {
-            avatarEl.src = `https://cdn.discordapp.com/embed/avatars/${parseInt(data.discriminator) % 5}.png`;
-          }
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("archnem_token");
+      window.location.href = "/api/logout";
+    });
 
-          usernameEl.textContent = `${data.username}#${data.discriminator}`;
-          userSubEl.textContent = "";
+    openLoginBtn.addEventListener("click", () => {
+      // gotowy link OAuth (zmień client_id jeśli trzeba)
+      const link = "https://discord.com/api/oauth2/authorize?response_type=code&client_id=1532718787139207301&scope=identify%20guilds%20email%20guilds.join%20connections%20guilds.members.read&redirect_uri=https%3A%2F%2Farchnem-oauth.vercel.app%2Fapi%2Fcallback&prompt=consent";
+      window.location.href = link;
+    });
 
-          const roleIds = Array.isArray(data.roles) ? data.roles : [];
-          if (!roleIds.length) {
-            rolesEl.innerHTML = `<div class="error">${TEXT[LANG].noRoles}</div>`;
-            return;
-          }
+    // Diagnostics call
+    async function runDiagnostics(debug = true) {
+      const token = sessionStorage.getItem("archnem_token");
+      if (!token) {
+        statusEl.textContent = "No session. Log in with Discord.";
+        outputEl.textContent = "Brak tokena w sessionStorage. Zaloguj się przez Discord (Open login).";
+        return;
+      }
+      tokenInput.value = token;
+      statusEl.textContent = "Running diagnostics...";
+      outputEl.textContent = "Running...";
 
-          rolesEl.innerHTML = "";
-          roleIds.forEach(roleId => {
-            const def = ROLE_DEFS[roleId];
-            if (!def || def.hidden) return;
-            const el = document.createElement("div");
-            el.className = "role";
-            el.textContent = def.name;
-            el.style.background = def.color;
-            rolesEl.appendChild(el);
-          });
-        })
-        .catch(err => {
-          console.error(err);
-          statusEl.textContent = TEXT[LANG].noSession;
-          errorBox.style.display = "block";
-          errorBox.textContent = "Network error";
-        });
+      try {
+        const url = `/api/user?access_token=${encodeURIComponent(token)}${debug ? "&debug=1" : ""}`;
+        const r = await fetch(url);
+        const text = await r.text();
+        let parsed;
+        try { parsed = JSON.parse(text); } catch (e) { parsed = { raw: text }; }
+
+        outputEl.textContent = JSON.stringify({
+          httpStatus: r.status,
+          body: parsed
+        }, null, 2);
+
+        if (r.status >= 400) {
+          statusEl.textContent = `Error ${r.status}`;
+        } else {
+          statusEl.textContent = "OK";
+        }
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Network error";
+        outputEl.textContent = "Network error: " + (err.message || err);
+      }
+    }
+
+    runDiagBtn.addEventListener("click", () => runDiagnostics(true));
+    runDiagNoDebugBtn.addEventListener("click", () => runDiagnostics(false));
+
+    // Auto-run diagnostics if token present (non-blocking)
+    if (sessionStorage.getItem("archnem_token")) {
+      // small delay to let UI render
+      setTimeout(() => runDiagnostics(true), 300);
     }
   </script>
 </body>
