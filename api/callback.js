@@ -6,27 +6,21 @@ export default async function handler(req, res) {
     const match = cookie.match(/archnem_oauth_state=([^;]+)/);
     const savedState = match ? match[1] : null;
 
-    // show what came in
+    // Missing OAuth parameters
     if (!code || !state) {
-      return res.status(400).json({
-        step: "initial",
-        error: "missing_code_or_state",
-        query: { code, state },
-        cookie,
-        savedState
-      });
+      return res.redirect("/panel.html?error=missing_code_or_state");
     }
 
+    // State mismatch
     if (!savedState || savedState !== state) {
-      return res.status(400).json({
-        step: "state_check",
-        error: "invalid_state",
-        query: { code, state },
-        cookie,
-        savedState
-      });
+      res.setHeader(
+        "Set-Cookie",
+        "archnem_oauth_state=; Path=/; Max-Age=0; Secure; SameSite=None"
+      );
+      return res.redirect("/panel.html?error=invalid_state");
     }
 
+    // Exchange code for token
     const params = new URLSearchParams({
       client_id: process.env.CLIENT_ID,
       client_secret: process.env.CLIENT_SECRET,
@@ -41,39 +35,22 @@ export default async function handler(req, res) {
       body: params
     });
 
-    const raw = await tokenResponse.text();
-    let tokenData;
-    try { tokenData = JSON.parse(raw); }
-    catch { tokenData = { parse_error: true, raw }; }
+    const tokenData = await tokenResponse.json();
 
     if (!tokenData.access_token) {
-      return res.status(400).json({
-        step: "token_exchange",
-        error: "token_failed",
-        status: tokenResponse.status,
-        body: tokenData
-      });
+      return res.redirect("/panel.html?error=token_failed");
     }
 
-    // set session cookie
+    // Set session cookie
     res.setHeader("Set-Cookie", [
       "archnem_oauth_state=; Path=/; Max-Age=0; Secure; SameSite=None",
       `token=${encodeURIComponent(tokenData.access_token)}; Path=/; Max-Age=3600; Secure; SameSite=None`
     ]);
 
-    return res.status(200).json({
-      step: "success",
-      message: "callback_ok",
-      tokenPreview: tokenData.access_token.slice(0, 16) + "...",
-      state,
-      savedState
-    });
+    // FINAL REDIRECT TO PANEL
+    return res.redirect("/panel.html");
 
   } catch (err) {
-    return res.status(500).json({
-      step: "exception",
-      error: "server_error",
-      details: String(err)
-    });
+    return res.redirect("/panel.html?error=server_error");
   }
 }
