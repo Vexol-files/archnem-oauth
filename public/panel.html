@@ -162,6 +162,17 @@
     margin-top:8px;
   }
 
+  .two-column {
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+
+  .two-column > .col {
+    flex:1;
+    min-width:260px;
+  }
+
   @media (max-width:768px) {
     body {
       flex-direction:column;
@@ -207,6 +218,7 @@
   <div class="nav-item active" data-tab="info">Informations</div>
   <div class="nav-item" id="statusTab" data-tab="status">Status</div>
   <div class="nav-item" id="botTab" data-tab="bot" style="display:none;">Bot Console</div>
+  <div class="nav-item" id="adminTab" data-tab="admin" style="display:none;">Admin Tools</div>
 
   <button id="logout" class="btn" style="margin-top:auto;">Logout</button>
 </div>
@@ -303,223 +315,77 @@
 
       <div style="font-size:22px; font-weight:700;">Bot Console</div>
 
-      <div style="margin-top:20px;">
-        <strong>Channel</strong>
-        <select id="channelSelect"></select>
-      </div>
+      <div class="two-column" style="margin-top:20px;">
+        <div class="col">
+          <strong>Channel</strong>
+          <select id="channelSelect"></select>
 
-      <div style="margin-top:20px; display:flex; gap:10px;">
-        <label><input type="checkbox" id="mentionEveryone"> @everyone</label>
-        <label><input type="checkbox" id="mentionHere"> @here</label>
-      </div>
+          <div style="margin-top:20px; display:flex; gap:10px;">
+            <label><input type="checkbox" id="mentionEveryone"> @everyone</label>
+            <label><input type="checkbox" id="mentionHere"> @here</label>
+          </div>
 
-      <div style="margin-top:10px;">
-        <strong>Mention user ID</strong>
-        <input id="mentionUserId" placeholder="optional">
-      </div>
+          <div style="margin-top:10px;">
+            <strong>Role mention (search by name)</strong>
+            <input id="mentionRoleName" placeholder="e.g. mod, admin">
+          </div>
 
-      <div style="margin-top:10px;">
-        <strong>Mention role ID</strong>
-        <input id="mentionRoleId" placeholder="optional">
-      </div>
+          <div style="margin-top:10px;">
+            <strong>User mention (search by username/nick)</strong>
+            <input id="mentionUserName" placeholder="e.g. daw, vex, ziom">
+          </div>
+        </div>
 
-      <div style="margin-top:20px;">
-        <strong>Message</strong>
-        <textarea id="messageContent"></textarea>
-      </div>
+        <div class="col">
+          <strong>Message</strong>
+          <textarea id="messageContent"></textarea>
 
-      <button id="sendMsg" class="btn primary" style="margin-top:10px;">Send as Bot</button>
-      <div id="sendResult" style="margin-top:10px; opacity:0.8;"></div>
+          <button id="sendMsg" class="btn primary" style="margin-top:10px;">Send as Bot</button>
+          <div id="sendResult" style="margin-top:10px; opacity:0.8;"></div>
+        </div>
+      </div>
 
     </div>
   </div>
 
+  <!-- ADMIN TOOLS -->
+  <div id="admin" class="tabPanel" style="display:none;">
+    <div class="card">
+      <div style="font-size:22px; font-weight:700;">Admin Tools</div>
+
+      <div class="two-column" style="margin-top:20px;">
+        <div class="col">
+          <strong>Search user (partial nick/username)</strong>
+          <input id="adminUserSearch" placeholder="type part of username...">
+          <div id="adminUserResults" style="margin-top:10px; max-height:160px; overflow-y:auto;"></div>
+
+          <strong style="margin-top:20px; display:block;">Search role (partial name)</strong>
+          <input id="adminRoleSearch" placeholder="type part of role name...">
+          <div id="adminRoleResults" style="margin-top:10px; max-height:160px; overflow-y:auto;"></div>
+        </div>
+
+        <div class="col">
+          <strong>Selected user</strong>
+          <div id="adminSelectedUser">None</div>
+
+          <strong style="margin-top:10px; display:block;">Selected role</strong>
+          <div id="adminSelectedRole">None</div>
+
+          <div style="margin-top:20px; display:flex; flex-wrap:wrap; gap:8px;">
+            <button id="adminGiveRole" class="btn">Give role</button>
+            <button id="adminRemoveRole" class="btn">Remove role</button>
+            <button id="adminKick" class="btn">Kick</button>
+            <button id="adminBan" class="btn">Ban</button>
+            <button id="adminDM" class="btn">DM user</button>
+          </div>
+
+          <div style="margin-top:10px;">
+            <strong>Admin action log</strong>
+            <div id="adminLog" style="margin-top:6px; max-height:160px; overflow-y:auto; font-size:13px; opacity:0.8;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
-<script>
-const BADGE_ICONS = {
-  HypeSquadBravery: "https://cdn.discordapp.com/badge-icons/1.png",
-  HypeSquadBrilliance: "https://cdn.discordapp.com/badge-icons/2.png",
-  HypeSquadBalance: "https://cdn.discordapp.com/badge-icons/3.png",
-  BugHunterLevel1: "https://cdn.discordapp.com/badge-icons/bug1.png",
-  BugHunterLevel2: "https://cdn.discordapp.com/badge-icons/bug2.png",
-  EarlySupporter: "https://cdn.discordapp.com/badge-icons/es.png",
-  VerifiedDeveloper: "https://cdn.discordapp.com/badge-icons/vd.png",
-  ActiveDeveloper: "https://cdn.discordapp.com/badge-icons/ad.png",
-  Nitro: "https://cdn.discordapp.com/badge-icons/nitro.png",
-  Staff: "https://cdn.discordapp.com/badge-icons/staff.png",
-  Partner: "https://cdn.discordapp.com/badge-icons/partner.png"
-};
-
-async function safeFetchJson(url, opts) {
-  const res = await fetch(url, opts);
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : {};
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-  return data;
-}
-
-async function loadUser() {
-  const data = await safeFetchJson('/api/user', { credentials:'same-origin' });
-
-  const avatarUrl = data.avatar 
-    ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  document.getElementById('avatarImg').src = avatarUrl;
-
-  if (data.avatarDecorationUrl) {
-    const deco = document.getElementById('avatarDeco');
-    deco.src = data.avatarDecorationUrl;
-    deco.style.display = "block";
-  }
-
-  const highest = data.roles.length ? data.roles[0] : null;
-  const bigNick = document.getElementById('bigNick');
-  bigNick.textContent = data.username;
-
-  if (highest && highest.color) {
-    bigNick.style.color = highest.color;
-    bigNick.style.textShadow = `0 0 15px ${highest.color}55`;
-  }
-
-  document.getElementById('smallUser').textContent =
-    `${data.username}#${data.discriminator}`;
-
-  if (data.isOwnerRole) {
-    document.getElementById('ownerIcon').style.display = "block";
-    document.getElementById('botTab').style.display = "block";
-  }
-
-  const badgesEl = document.getElementById('badges');
-  badgesEl.innerHTML = "";
-  if (data.badges) {
-    data.badges.forEach(b => {
-      if (BADGE_ICONS[b]) {
-        const img = document.createElement('img');
-        img.src = BADGE_ICONS[b];
-        img.className = "badge";
-        badgesEl.appendChild(img);
-      }
-    });
-  }
-
-  const rolesEl = document.getElementById('roles');
-  rolesEl.innerHTML = '';
-  data.roles.forEach(r => {
-    const pill = document.createElement('div');
-    pill.className = 'pill';
-    pill.textContent = r.name;
-    if (r.color) {
-      pill.style.background = r.color;
-      pill.style.color = "#000";
-    }
-    rolesEl.appendChild(pill);
-  });
-
-  document.getElementById('userId').textContent = data.id;
-  document.getElementById('accountEmail').textContent = data.email || '—';
-  document.getElementById('highestRole').textContent = highest ? highest.name : '—';
-}
-
-async function loadChannels() {
-  const data = await safeFetchJson('/api/bot/channels', { credentials:'same-origin' });
-
-  const select = document.getElementById('channelSelect');
-  select.innerHTML = '';
-
-  data.channels.forEach(ch => {
-    const opt = document.createElement('option');
-    opt.value = ch.id;
-    opt.textContent = `${ch.typeName} — #${ch.name}`;
-    select.appendChild(opt);
-  });
-}
-
-async function loadStatus() {
-  try {
-    const data = await safeFetchJson('/api/status', { credentials:'same-origin' });
-    const s = data.statuses;
-
-    const free = s["1532746207040897155"];
-    const premium = s["1534247246856458404"];
-    const beta = s["1536372284644655165"];
-
-    if (free) {
-      document.getElementById('freeDot').style.background = free.color;
-      document.getElementById('freeText').textContent =
-        `${free.rawName} — ${free.state}`;
-    }
-
-    if (premium) {
-      document.getElementById('premiumDot').style.background = premium.color;
-      document.getElementById('premiumText').textContent =
-        `${premium.rawName} — ${premium.state}`;
-    }
-
-    if (beta) {
-      document.getElementById('betaDot').style.background = beta.color;
-      document.getElementById('betaText').textContent =
-        `${beta.rawName} — ${beta.state}`;
-    }
-
-  } catch (err) {
-    document.getElementById('freeText').textContent = "Error loading status";
-    document.getElementById('premiumText').textContent = "Error loading status";
-    document.getElementById('betaText').textContent = "Error loading status";
-  }
-}
-
-document.querySelectorAll('.nav-item').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const tab = btn.dataset.tab;
-    document.querySelectorAll('.tabPanel').forEach(p => p.style.display='none');
-    document.getElementById(tab).style.display='block';
-  });
-});
-
-document.getElementById('logout').addEventListener('click', () => {
-  window.location.href = '/api/logout';
-});
-
-document.getElementById('sendMsg').addEventListener('click', async () => {
-  try {
-    const channelId = document.getElementById('channelSelect').value;
-    const content = document.getElementById('messageContent').value;
-    const mentionEveryone = document.getElementById('mentionEveryone').checked;
-    const mentionHere = document.getElementById('mentionHere').checked;
-    const mentionUserId = document.getElementById('mentionUserId').value || null;
-    const mentionRoleId = document.getElementById('mentionRoleId').value || null;
-
-    const body = {
-      channelId,
-      content,
-      mentionEveryone,
-      mentionHere,
-      mentionUserId,
-      mentionRoleId
-    };
-
-    const res = await safeFetchJson('/api/bot/sendMessage', {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      credentials:"same-origin",
-      body:JSON.stringify(body)
-    });
-
-    document.getElementById('sendResult').textContent =
-      `Sent message ID: ${res.messageId}`;
-  } catch (err) {
-    document.getElementById('sendResult').textContent = `Error: ${err.message}`;
-  }
-});
-
-loadUser();
-loadChannels();
-loadStatus();
-</script>
-
-</body>
-</html>
