@@ -9,7 +9,6 @@ export default async function handler(req, res) {
     const stateMatch = cookie.match(/archnem_oauth_state=([^;]+)/);
     const savedState = stateMatch ? stateMatch[1] : null;
     if (!savedState || savedState !== state) {
-      // clear state cookie and abort
       res.setHeader("Set-Cookie", "archnem_oauth_state=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0");
       return res.redirect("/panel.html?error=invalid_state");
     }
@@ -43,7 +42,7 @@ export default async function handler(req, res) {
       return res.redirect("/panel.html?error=server_security");
     }
 
-    // remove state cookie and set session cookie named "token"
+    // set HttpOnly cookie named "token" and remove state cookie
     res.setHeader("Set-Cookie", [
       "archnem_oauth_state=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0",
       `token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${60 * 60}`
