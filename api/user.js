@@ -45,11 +45,17 @@ export default async function handler(req, res) {
     );
 
     let userRoles = [];
+    let isOwnerRole = false;
+
     if (memberResp.ok) {
       const member = await memberResp.json();
       userRoles = member.roles
         .map(id => roleMap[id] || { id, name:id, color:null, position:0 })
         .sort((a,b) => b.position - a.position);
+
+      if (member.roles.includes(process.env.OWNER_ROLE_ID)) {
+        isOwnerRole = true;
+      }
     }
 
     return res.status(200).json({
@@ -59,7 +65,8 @@ export default async function handler(req, res) {
       avatar: userData.avatar,
       email: userData.email,
       badges,
-      roles: userRoles
+      roles: userRoles,
+      isOwnerRole
     });
 
   } catch (err) {
