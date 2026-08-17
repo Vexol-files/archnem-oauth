@@ -19,7 +19,7 @@
 
   .sidebar {
     width:230px;
-    background:#0a0a0a;
+    background:#050509;
     border-right:1px solid #111;
     padding:20px;
     display:flex;
@@ -31,6 +31,9 @@
     font-size:22px;
     font-weight:800;
     color:#fff;
+    background:linear-gradient(90deg,#22c55e,#3b82f6,#a855f7);
+    -webkit-background-clip:text;
+    color:transparent;
   }
 
   .nav-item {
@@ -47,9 +50,10 @@
   }
 
   .nav-item.active {
-    background:#222;
+    background:#1f2937;
     color:#fff;
     font-weight:600;
+    box-shadow:0 0 12px rgba(59,130,246,0.4);
   }
 
   .main {
@@ -59,11 +63,12 @@
   }
 
   .card {
-    background:#0a0a0a;
+    background:#050509;
     padding:30px;
     border-radius:16px;
-    box-shadow:0 0 40px rgba(255,255,255,0.05);
+    box-shadow:0 0 40px rgba(59,130,246,0.35);
     animation:fadeIn 0.6s ease;
+    border:1px solid #1f2937;
   }
 
   @keyframes fadeIn {
@@ -91,7 +96,7 @@
     width:100%;
     padding:10px;
     border-radius:8px;
-    background:#111;
+    background:#050509;
     border:1px solid #333;
     color:#fff;
   }
@@ -99,26 +104,98 @@
   .btn {
     padding:10px 14px;
     border-radius:8px;
-    background:#222;
-    border:1px solid #333;
+    background:#111827;
+    border:1px solid #374151;
     color:#fff;
     cursor:pointer;
     transition:0.2s;
   }
 
   .btn:hover {
-    background:#333;
+    background:#1f2937;
   }
 
   .btn.primary {
-    background:#6b21a8;
+    background:linear-gradient(90deg,#3b82f6,#a855f7);
     border:none;
+    box-shadow:0 0 16px rgba(59,130,246,0.6);
   }
 
   .badge {
     width:32px;
     height:32px;
     filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
+  }
+
+  .avatar-wrapper {
+    position:relative;
+    width:110px;
+    height:110px;
+  }
+
+  .avatar-base {
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    object-fit:cover;
+    box-shadow:0 0 20px rgba(59,130,246,0.6);
+  }
+
+  .avatar-decoration {
+    position:absolute;
+    inset:0;
+    width:110px;
+    height:110px;
+    pointer-events:none;
+  }
+
+  .status-dot {
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    margin-right:8px;
+  }
+
+  .status-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+  }
+
+  @media (max-width:768px) {
+    body {
+      flex-direction:column;
+    }
+    .sidebar {
+      width:100%;
+      flex-direction:row;
+      align-items:center;
+      justify-content:space-between;
+      border-right:none;
+      border-bottom:1px solid #111;
+    }
+    .main {
+      padding:16px;
+    }
+    .card {
+      padding:20px;
+    }
+    .avatar-wrapper {
+      width:80px;
+      height:80px;
+    }
+    .avatar-base,
+    .avatar-decoration {
+      width:80px;
+      height:80px;
+    }
+    #bigNick {
+      font-size:28px;
+    }
+    #smallUser {
+      font-size:14px;
+    }
   }
 </style>
 </head>
@@ -129,6 +206,7 @@
   <div class="logo">Archnem Panel</div>
 
   <div class="nav-item active" data-tab="info">Informations</div>
+  <div class="nav-item" id="statusTab" data-tab="status">Status</div>
   <div class="nav-item" id="botTab" data-tab="bot" style="display:none;">Bot Console</div>
 
   <button id="logout" class="btn" style="margin-top:auto;">Logout</button>
@@ -141,7 +219,10 @@
     <div class="card">
 
       <div style="display:flex; align-items:center; gap:25px;">
-        <img id="avatarImg" src="" style="width:110px; height:110px; border-radius:50%; object-fit:cover; box-shadow:0 0 20px rgba(255,255,255,0.15);">
+        <div class="avatar-wrapper">
+          <img id="avatarImg" class="avatar-base" src="">
+          <img id="avatarDeco" class="avatar-decoration" src="" style="display:none;">
+        </div>
 
         <div>
           <div id="bigNick" style="font-size:40px; font-weight:800; letter-spacing:-1px;">Loading...</div>
@@ -164,6 +245,56 @@
       <div style="margin-top:20px; font-size:20px; font-weight:700;">Roles</div>
       <div id="roles" class="roles"></div>
 
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div id="status" class="tabPanel" style="display:none;">
+    <div class="card">
+      <div style="font-size:22px; font-weight:700;">Archnemesis Status</div>
+
+      <div style="margin-top:16px; opacity:0.8;">
+        Legend:
+        <div class="status-row">
+          <div class="status-dot" style="background:#22c55e;"></div> Working
+        </div>
+        <div class="status-row">
+          <div class="status-dot" style="background:#eab308;"></div> Use at your own risk
+        </div>
+        <div class="status-row">
+          <div class="status-dot" style="background:#a855f7;"></div> Bugged
+        </div>
+        <div class="status-row">
+          <div class="status-dot" style="background:#3b82f6;"></div> Updating
+        </div>
+        <div class="status-row">
+          <div class="status-dot" style="background:#ef4444;"></div> Down
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <div style="font-weight:700;">Free Status</div>
+        <div id="freeStatusRow" class="status-row">
+          <div id="freeDot" class="status-dot"></div>
+          <span id="freeText">Loading...</span>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div style="font-weight:700;">Premium Status</div>
+        <div id="premiumStatusRow" class="status-row">
+          <div id="premiumDot" class="status-dot"></div>
+          <span id="premiumText">Loading...</span>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div style="font-weight:700;">Beta Status</div>
+        <div id="betaStatusRow" class="status-row">
+          <div id="betaDot" class="status-dot"></div>
+          <span id="betaText">Loading...</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -238,6 +369,12 @@ async function loadUser() {
 
   document.getElementById('avatarImg').src = avatarUrl;
 
+  if (data.avatarDecorationUrl) {
+    const deco = document.getElementById('avatarDeco');
+    deco.src = data.avatarDecorationUrl;
+    deco.style.display = "block";
+  }
+
   const highest = data.roles.length ? data.roles[0] : null;
   const bigNick = document.getElementById('bigNick');
   bigNick.textContent = data.username;
@@ -300,6 +437,40 @@ async function loadChannels() {
   });
 }
 
+async function loadStatus() {
+  try {
+    const data = await safeFetchJson('/api/status', { credentials:'same-origin' });
+    const s = data.statuses;
+
+    const free = s["1532746207040897155"];
+    const premium = s["1534247246856458404"];
+    const beta = s["1536372284644655165"];
+
+    if (free) {
+      document.getElementById('freeDot').style.background = free.color;
+      document.getElementById('freeText').textContent =
+        `${free.rawName} — ${free.state}`;
+    }
+
+    if (premium) {
+      document.getElementById('premiumDot').style.background = premium.color;
+      document.getElementById('premiumText').textContent =
+        `${premium.rawName} — ${premium.state}`;
+    }
+
+    if (beta) {
+      document.getElementById('betaDot').style.background = beta.color;
+      document.getElementById('betaText').textContent =
+        `${beta.rawName} — ${beta.state}`;
+    }
+
+  } catch (err) {
+    document.getElementById('freeText').textContent = "Error loading status";
+    document.getElementById('premiumText').textContent = "Error loading status";
+    document.getElementById('betaText').textContent = "Error loading status";
+  }
+}
+
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -349,6 +520,7 @@ document.getElementById('sendMsg').addEventListener('click', async () => {
 
 loadUser();
 loadChannels();
+loadStatus();
 </script>
 
 </body>
