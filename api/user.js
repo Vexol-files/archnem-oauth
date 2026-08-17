@@ -1,7 +1,7 @@
 // /api/user.js (bezpieczny)
 export default async function handler(req, res) {
   try {
-    const access_token = req.query.access_token || (req.headers.cookie || "").match(/archnem_token=([^;]+)/)?.[1];
+    const access_token = req.query.access_token || (req.headers.cookie || "").match(/archnem_token1=([^;]+)/)?.[1];
 
     if (!access_token) return res.status(400).json({ error: "Missing access_token" });
 
