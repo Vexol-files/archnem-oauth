@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       `token=${encodeURIComponent(tokenData.access_token)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${60 * 60}`
     ]);
 
-    // redirect to panel WITHOUT token in URL
+    // redirect to panel on same domain (no token in URL)
     return res.redirect("/panel.html");
   } catch (err) {
     console.error("callback.js error:", err);
